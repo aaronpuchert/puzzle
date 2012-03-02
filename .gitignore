@@ -1,0 +1,7 @@
+
+*.ncb
+/Debug
+/Release
+*.exe
+/README
+*.suo
