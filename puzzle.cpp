@@ -32,7 +32,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 	// LOW: skip whitespace (well, maybe)
 	for (int i=0; i<len; ++i)
 		for (int op=0; op<ParseTableEntries; ++op)			// LOW: what about a std::map?
-			if (expr[i]	== ParseTable[op].op && priority >= ParseTable[op].priority) {
+			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
 				split = i;
 				priority = ParseTable[op].priority;
@@ -128,10 +128,10 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : lettermap(rad), leading(rad), 
 		it->second = num;
 	}
 
-	// make	syntax tree
+	// make syntax tree
 	root = new Expr(puzzle, (int)strlen(puzzle), Map, rad);
 
-	// leading digits aren't allowed to	be zero
+	// leading digits aren't allowed to be zero
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
 		leading[Map[puzzle[0]]] = true;
 	for (int i=1; puzzle[i]; ++i)
@@ -185,7 +185,7 @@ Puzzle::MapGen::~MapGen()
 // M4. [Reverse a_{j+1}, ..., a_m] k<-j+1; l<-m; while (k<l) {a_k <-> a_l, k++, l--} if (j>0) goto M1.
 // M5. [Next combination] j <- m; while (a_j == j+(n-m)) --j;
 //     if (j=0) finished;
-//     else {++a_j; while (j<m)	a_{++j}	<- a_{j-1}+1; goto M1}
+//     else {++a_j; while (j<m) a_{++j} <- a_{j-1}+1; goto M1}
 bool Puzzle::MapGen::NextMap()
 {
 	int j, l, k, Temp;

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "puzzle.h"
 
-int	main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	// extract puzzle out of command line
 	int nRad = 10;
@@ -13,8 +13,8 @@ int	main(int argc, char **argv)
 	std::cout << "There are " << puzz.DomainSize() << " different letters.\n\n";
 
 	// try all maps
-	int	nCount=0;
-	try	{
+	int nCount=0;
+	try {
 		Puzzle::MapGen Gen(puzz.DomainSize(), nRad);
 		for (int i=0; i<puzz.DomainSize(); ++i)
 			std::cout << puzz[i] << ' ';
