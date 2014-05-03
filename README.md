@@ -1,6 +1,8 @@
 PUZZLE - SOLVING ALPHAMETICS
 ----------------------------
 
+[![Build Status](https://travis-ci.org/aaronpuchert/puzzle.svg?branch=master)](https://travis-ci.org/aaronpuchert/puzzle)
+
 Introduction
 ------------
 
