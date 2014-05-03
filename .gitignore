@@ -1,14 +1,7 @@
-
-/Debug
-/Release
-/ipch
+# executables
 *.exe
-*.sln
-*.vcproj
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-*.ncb
-*.sdf
-*.opensdf
-*.suo
+puzzle
+
+# object files
+*.o
+
