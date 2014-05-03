@@ -17,8 +17,7 @@ namespace Puzzle {
 		// LOW: add more operators
 		LEAF = 0x1000,		// dummy type
 		WORD,				// "fixed-value"/number leaf
-		NUMBER,				// "variable-value"/word leaf
-		FORCE_DWORD	= 0x7fffffff
+		NUMBER				// "variable-value"/word leaf
 	};
 
 	// LOW: exceptions...

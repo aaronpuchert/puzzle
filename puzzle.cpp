@@ -2,6 +2,8 @@
 #include <utility>
 #include <iterator>
 #include <limits>
+#include <cstdlib>
+#include <cstring>
 
 struct ExprType {
 	char op;
@@ -45,6 +47,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 	}
 	else {
 		// word or number?
+		int i;
 		for (i=0; i<len; ++i)
 			if (expr[i] >= '0' && expr[i] <= '9')
 				break;
@@ -113,12 +116,12 @@ int Puzzle::Expr::Eval(const int *NumMap) const
 //  IMPLEMENTATION OF PUZZLES
 //------------------------------
 
-Puzzle::Puzz::Puzz(const char *puzzle, int rad) : lettermap(rad), leading(rad), radix(rad)
+Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), leading(rad)
 {
 	// fill Map
 	std::map<char, int> Map;
 	for (int i=0; puzzle[i]; ++i)
-		if (puzzle[i]>='A' && puzzle[i]<='Z')
+		if (puzzle[i]>='A' && puzzle[i]<='Z')				// what about nondecimal digits?
 			Map.insert(std::pair<char, int>(puzzle[i], -1));
 
 	// assign numbers to letters

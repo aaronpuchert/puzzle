@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <cstdlib>
 #include "puzzle.h"
 
 int main(int argc, char **argv)
@@ -28,11 +29,11 @@ int main(int argc, char **argv)
 			}
 		while (Gen.NextMap());
 	}
-	catch (char *Exc) {
+	catch (const char *Exc) {
 		std::cout << "Error: " << Exc << "\n\n";
 	}
 
-	std::cout << nCount << " solutions found.";
+	std::cout << nCount << " solutions found.\n";
 
 	return 0;
 }
