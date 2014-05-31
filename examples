@@ -44,3 +44,4 @@ for EX in $EXAMPLES; do
 done
 
 echo "$PASS passed, $FAIL failed."
+exit $FAIL

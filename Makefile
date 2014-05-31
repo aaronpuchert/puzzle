@@ -16,5 +16,9 @@ puzzle.o: puzzle.cpp puzzle.h
 main.o: main.cpp puzzle.h
 	$(CXX) -c $(CFLAGS) main.cpp
 
+# Tests
+test: puzzle
+	./examples
+
 clean:
 	-rm *.o puzzle
