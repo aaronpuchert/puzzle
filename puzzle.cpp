@@ -81,13 +81,13 @@ Puzzle::Expr::~Expr()
 	}
 }
 
-int Puzzle::Expr::Eval(const int *NumMap) const
+fraction<int> Puzzle::Expr::Eval(const int *NumMap) const
 {
 	int res=0, val=1;
 
 	switch (type) {
 		case EQUAL:
-			return (int)(left->Eval(NumMap) == right->Eval(NumMap));
+			return (fraction<int>)(left->Eval(NumMap) == right->Eval(NumMap));
 		case PLUS:
 			return left->Eval(NumMap) + right->Eval(NumMap);
 		case MINUS:
@@ -95,20 +95,15 @@ int Puzzle::Expr::Eval(const int *NumMap) const
 		case MULTIPLY:
 			return left->Eval(NumMap) * right->Eval(NumMap);
 		case DIVIDE:
-			res = left->Eval(NumMap);
-			val = right->Eval(NumMap);
-			if (res%val == 0)
-				return res / val;
-			else
-				return -1;				 //	TODO: find better solution (fraction type?)
+			return left->Eval(NumMap) / right->Eval(NumMap);
 		case WORD:
 			for (int i=0; word[i]>=0; ++i) {
 				res += NumMap[word[i]]*val;
 				val *= radix;
 			}
-			return res;
+			return fraction<int>(res);
 		case NUMBER:
-			return value;
+			return fraction<int>(value);
 	}
 }
 

@@ -10,10 +10,10 @@ puzzle: $(OBJS)
 	$(CXX) $(LFLAGS) -o puzzle $(OBJS)
 
 # Object files
-puzzle.o: puzzle.cpp puzzle.h
+puzzle.o: puzzle.cpp puzzle.h fraction.h
 	$(CXX) -c $(CFLAGS) puzzle.cpp
 
-main.o: main.cpp puzzle.h
+main.o: main.cpp puzzle.h fraction.h
 	$(CXX) -c $(CFLAGS) main.cpp
 
 # Tests

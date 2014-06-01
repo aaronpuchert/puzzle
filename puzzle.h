@@ -3,6 +3,7 @@
 //------------------------------
 #include <vector>
 #include <map>
+#include "fraction.h"
 
 namespace Puzzle {
 	// node types
@@ -43,7 +44,7 @@ namespace Puzzle {
 	public:
 		Expr(const char *expr, int len, const std::map<char, int> &transmap, int rad);
 		~Expr();
-		int Eval(const int *NumMap) const;
+		fraction<int> Eval(const int* NumMap) const;
 	};
 
 	// puzzle data structure
