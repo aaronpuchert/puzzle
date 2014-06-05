@@ -24,12 +24,19 @@ if wanted.
 Compiling
 ---------
 
-Given the number of files the project consists of, it
-seems to be unnecessary to provide a Makefile. As of
-today, nothing but the most basic operations are used,
-thus there should be no problems with compiling on
-your favorite exotic platform. (a rather new compiler
-provided - we rely on templates here, for example)
+After downloading the zip or tarball, just switch into the
+project directory and execute
+
+	make
+
+or, if you prefer gcc,
+
+	export CXX=g++; make -e
+
+If you want to be really sure that everything went fine,
+execute
+
+	make test
 
 Usage
 -----

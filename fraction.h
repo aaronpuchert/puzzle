@@ -1,4 +1,4 @@
-// GENERRIC EUCLIDEAN ALGORITHM FOR TYPES WITH %
+// GENERIC EUCLIDEAN ALGORITHM FOR TYPES WITH %
 template<typename T> inline T gcd (T a, T b)
 {
 	T c;
