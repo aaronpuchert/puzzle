@@ -1,24 +1,27 @@
-# Definitions
-OBJS = puzzle.o main.o
-CXX = clang++
+# Settings
+CXX ?= clang++
 #DEBUG = -g
 CFLAGS = -Wall -O3 $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
 
+# Files
+TARGET = puzzle
+CPPS = puzzle.cpp main.cpp
+OBJS = $(patsubst %.cpp, %.o, $(CPPS))
+
 # Main target
-puzzle: $(OBJS)
+$(TARGET): $(OBJS)
 	$(CXX) $(LFLAGS) -o puzzle $(OBJS)
 
 # Object files
-puzzle.o: puzzle.cpp puzzle.h fraction.h
-	$(CXX) -c $(CFLAGS) puzzle.cpp
-
-main.o: main.cpp puzzle.h fraction.h
-	$(CXX) -c $(CFLAGS) main.cpp
+$(OBJS): %.o: %.cpp puzzle.h fraction.h
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 # Tests
-test: puzzle
+test: $(TARGET)
 	./examples
 
 clean:
-	-rm *.o puzzle
+	-rm *.o $(TARGET)
+
+.PHONY: test clean

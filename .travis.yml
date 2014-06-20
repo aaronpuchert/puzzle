@@ -3,5 +3,5 @@ compiler:
   - clang
   - gcc
 script:
-  - make -e
+  - make
   - make test
