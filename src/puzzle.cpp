@@ -1,9 +1,9 @@
-#include "puzzle.h"
 #include <utility>
 #include <iterator>
 #include <limits>
 #include <cstdlib>
 #include <cstring>
+#include "puzzle.hpp"
 
 struct ExprType {
 	char op;

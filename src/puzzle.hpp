@@ -3,7 +3,7 @@
 //------------------------------
 #include <vector>
 #include <map>
-#include "fraction.h"
+#include "fraction.hpp"
 
 namespace Puzzle {
 	// node types

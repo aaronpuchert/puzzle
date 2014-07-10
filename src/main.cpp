@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
-#include "puzzle.h"
+#include "puzzle.hpp"
 
 int main(int argc, char **argv)
 {
