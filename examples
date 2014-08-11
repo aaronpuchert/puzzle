@@ -35,13 +35,13 @@ FAIL=0
 for EX in $EXAMPLES; do
 	NUM=$(./puzzle $EX | grep solutions | sed -e "s/ solutions found.//g")
 	if [ $NUM -eq 1 ]; then
-		echo "$EX passed"
+		echo -e "$EX \e[32mpassed\e[0m"
 		PASS=$((PASS+1))
 	else
-		echo "$EX not passed: $NUM solutions"
+		echo -e "$EX \e[31mnot passed\e[0m: $NUM solutions"
 		FAIL=$((FAIL+1))
 	fi
 done
 
-echo "$PASS passed, $FAIL failed."
+echo -e "\e[1m$PASS passed, $FAIL failed.\e[0m"
 exit $FAIL
