@@ -1,7 +1,8 @@
-# executables
+# Build files
 *.exe
 puzzle
+build/
 
-# object files
-*.o
-
+# project files
+*.kdev4
+.kdev4/
