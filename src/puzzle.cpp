@@ -28,6 +28,7 @@ struct Puzzle::Expr::ExprType {
 	int priority;
 };
 
+// LOW: what about a std::map?
 const Puzzle::Expr::ExprType Puzzle::Expr::ParseTable[] = {
 	{'=', Puzzle::Expr::NodeType::EQUAL, 0},
 	{'+', Puzzle::Expr::NodeType::PLUS, 1},
@@ -49,7 +50,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
 	for (int i=0; i<len; ++i)
-		for (int op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)			// LOW: what about a std::map?
+		for (int op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
 			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
 				split = i;
@@ -212,26 +213,26 @@ bool Puzzle::MapGen::NextMap()
 	int j, l, k, Temp;
 
 	// M2
-	j = m-2;		// "j <- m-1"
+	j = m-2;        // "j <- m-1"
 	while (j>=0 && (map[j] >= map[j+1])) --j;
 	if (j >= 0) {
 		// M3
-		l = m-1;	// "l <- m"
+		l = m-1;    // "l <- m"
 		while (map[j] >= map[l]) --l;
 		Temp = map[j]; map[j] = map[l]; map[l] = Temp;
 	}
 
 	// M4
-	k = j+1;		// "k <- j+1"
-	l = m-1;		// "l <- m"
+	k = j+1;        // "k <- j+1"
+	l = m-1;        // "l <- m"
 	while (k<l) {
 		Temp = map[k]; map[k] = map[l]; map[l] = Temp;
 		++k; --l;
 	}
-	
+
 	if (j < 0) {
 		// M5
-		j = m-1;	// "j <- m"
+		j = m-1;    // "j <- m"
 		int diff = n-m;
 		while (j>=0 && (map[j] == j+diff)) --j;
 		if (j<0) return false;
