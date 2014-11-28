@@ -189,7 +189,7 @@ Puzzle::MapGen::MapGen(int DomSize, int CodSize) : n(CodSize), m(DomSize)
 
 Puzzle::MapGen::~MapGen()
 {
-	delete map;
+	delete[] map;
 }
 
 //---------------------------  ALGORITHM DESCRIPTION  -------------------------
