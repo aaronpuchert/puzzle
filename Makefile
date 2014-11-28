@@ -1,6 +1,6 @@
 # Settings
 #DEBUG = -g
-CFLAGS = -Wall -O3 $(DEBUG)
+CFLAGS = -Wall -std=c++11 -O3 $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
 
 # Files

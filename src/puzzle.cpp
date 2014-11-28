@@ -6,19 +6,34 @@
 #include <stdexcept>
 #include "puzzle.hpp"
 
-struct ExprType {
+/**
+ * Parser data
+ */
+enum class Puzzle::Expr::NodeType {
+	EQUAL = 0,          // should occur exactly once - at root
+	PLUS,
+	MINUS,
+	MULTIPLY,
+	DIVIDE,
+	// FACTORIAL,
+	// BINOMIAL,   etc.
+	LEAF = 0x1000,      // dummy type
+	WORD,               // "fixed-value"/number leaf
+	NUMBER              // "variable-value"/word leaf
+};
+
+struct Puzzle::Expr::ExprType {
 	char op;
-	Puzzle::NodeType type;
+	Puzzle::Expr::NodeType type;
 	int priority;
 };
 
-const int ParseTableEntries = 5; 
-const ExprType ParseTable[] = {
-	{'=', Puzzle::EQUAL, 0},
-	{'+', Puzzle::PLUS, 1},
-	{'-', Puzzle::MINUS, 1},
-	{'*', Puzzle::MULTIPLY, 2},
-	{'/', Puzzle::DIVIDE, 2}
+const Puzzle::Expr::ExprType Puzzle::Expr::ParseTable[] = {
+	{'=', Puzzle::Expr::NodeType::EQUAL, 0},
+	{'+', Puzzle::Expr::NodeType::PLUS, 1},
+	{'-', Puzzle::Expr::NodeType::MINUS, 1},
+	{'*', Puzzle::Expr::NodeType::MULTIPLY, 2},
+	{'/', Puzzle::Expr::NodeType::DIVIDE, 2}
 };
 
 //------------------------------
@@ -27,14 +42,14 @@ const ExprType ParseTable[] = {
 
 Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transmap, int rad)
 {
-	type = LEAF;
+	type = NodeType::LEAF;
 	int split;
 	int priority = std::numeric_limits<int>::max();
 
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
 	for (int i=0; i<len; ++i)
-		for (int op=0; op<ParseTableEntries; ++op)			// LOW: what about a std::map?
+		for (int op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)			// LOW: what about a std::map?
 			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
 				split = i;
@@ -42,7 +57,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			}
 
 	// split expression and process parts recursively
-	if (type != LEAF) {
+	if (type != NodeType::LEAF) {
 		left = new Expr(expr, split, transmap, rad);
 		right = new Expr(expr+split+1, len-split-1, transmap, rad);
 	}
@@ -53,7 +68,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			if (expr[i] >= '0' && expr[i] <= '9')
 				break;
 		if (i == len) {	 // word
-			type = WORD;
+			type = NodeType::WORD;
 			word = new int[len+1];
 			for (i=0; i<len; ++i)
 				word[i] = transmap.find(expr[(len-1)-i])->second;
@@ -61,7 +76,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			radix = rad;
 		}
 		else {			 // number
-			type = NUMBER;
+			type = NodeType::NUMBER;
 			const char *end;
 			end = expr+len;
 			value = strtol(expr, const_cast<char **>(&end), rad);
@@ -72,13 +87,20 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 
 Puzzle::Expr::~Expr()
 {
-	if (type & LEAF) {		// leaf
-		if (type == WORD)
-			delete word;
-	}
-	else {					// inner node
+	switch (type) {
+	case NodeType::WORD:      // leaf
+		delete word;
+		break;
+	case NodeType::NUMBER:
+		break;
+	case NodeType::EQUAL:
+	case NodeType::PLUS:
+	case NodeType::MINUS:
+	case NodeType::MULTIPLY:
+	case NodeType::DIVIDE:    // inner node
 		delete left;
 		delete right;
+		break;
 	}
 }
 
@@ -87,23 +109,23 @@ fraction<int> Puzzle::Expr::Eval(const int *NumMap) const
 	int res=0, val=1;
 
 	switch (type) {
-		case EQUAL:
+		case NodeType::EQUAL:
 			return (fraction<int>)(left->Eval(NumMap) == right->Eval(NumMap));
-		case PLUS:
+		case NodeType::PLUS:
 			return left->Eval(NumMap) + right->Eval(NumMap);
-		case MINUS:
+		case NodeType::MINUS:
 			return left->Eval(NumMap) - right->Eval(NumMap);
-		case MULTIPLY:
+		case NodeType::MULTIPLY:
 			return left->Eval(NumMap) * right->Eval(NumMap);
-		case DIVIDE:
+		case NodeType::DIVIDE:
 			return left->Eval(NumMap) / right->Eval(NumMap);
-		case WORD:
+		case NodeType::WORD:
 			for (int i=0; word[i]>=0; ++i) {
 				res += NumMap[word[i]]*val;
 				val *= radix;
 			}
 			return fraction<int>(res);
-		case NUMBER:
+		case NodeType::NUMBER:
 			return fraction<int>(value);
 	}
 }

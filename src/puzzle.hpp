@@ -7,22 +7,6 @@
 #include "fraction.hpp"
 
 namespace Puzzle {
-	// node types
-	enum NodeType {
-		EQUAL = 0,			// should occur exactly once - at root
-		PLUS,
-		MINUS,
-		MULTIPLY,
-		DIVIDE,
-		// FACTORIAL,
-		// BINOMIAL,   etc.
-		// LOW: add more operators
-		LEAF = 0x1000,		// dummy type
-		WORD,				// "fixed-value"/number leaf
-		NUMBER				// "variable-value"/word leaf
-	};
-
-	// LOW: exceptions...
 	/**
 	 * Expression type
 	 */
@@ -33,6 +17,14 @@ namespace Puzzle {
 		fraction<int> Eval(const int* NumMap) const;
 
 	private:
+		// Node types
+		enum class NodeType;
+		NodeType type;
+
+		// Internal parser table
+		struct ExprType;
+		static const ExprType ParseTable[];
+
 		union {
 			// inner nodes
 			struct {
@@ -95,4 +87,6 @@ namespace Puzzle {
 	private:
 		const Puzz &puzz;
 	};
+
+	// LOW: exceptions...
 }
