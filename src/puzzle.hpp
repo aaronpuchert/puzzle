@@ -3,6 +3,7 @@
 //------------------------------
 #include <vector>
 #include <map>
+#include <ostream>
 #include "fraction.hpp"
 
 namespace Puzzle {
@@ -22,11 +23,16 @@ namespace Puzzle {
 	};
 
 	// LOW: exceptions...
-
-	// expression type
+	/**
+	 * Expression type
+	 */
 	class Expr {
-	protected:
-		NodeType type;
+	public:
+		Expr(const char *expr, int len, const std::map<char, int> &transmap, int rad);
+		~Expr();
+		fraction<int> Eval(const int* NumMap) const;
+
+	private:
 		union {
 			// inner nodes
 			struct {
@@ -40,42 +46,53 @@ namespace Puzzle {
 			// number leaf
 			int value;
 		};
-
-	public:
-		Expr(const char *expr, int len, const std::map<char, int> &transmap, int rad);
-		~Expr();
-		fraction<int> Eval(const int* NumMap) const;
 	};
 
-	// puzzle data structure
+	/**
+	 * Puzzle data structure
+	 */
 	class Puzz {
-	protected:
-		int radix;
-		int num;
-		std::vector<char> lettermap;
-		std::vector<bool> leading;
-		Expr *root;
-
 	public:
 		Puzz(const char *puzzle, int rad);
 		~Puzz();
 		bool Eval(const int *NumMap) const;
 		int DomainSize() const {return num;}
 		char operator[](int n) const {return lettermap[n];}
+
+		int radix;
+	private:
+		int num;
+		std::vector<char> lettermap;
+		std::vector<bool> leading;
+		Expr *root;
 	};
 
-	// generates all injective maps
+	/**
+	 * Generates all injective maps
+	 */
 	class MapGen {
-	protected:
-		int n;		// codomain size
-		int m;		// domain size
-		int *map;	// current map
-
 	public:
 		MapGen(int DomSize, int CodSize);
 		~MapGen();
 		int operator [](int i) const {return map[i];}
 		int *operator *() const {return map;}
 		bool NextMap();
+
+	private:
+		int n;      // codomain size
+		int m;      // domain size
+		int *map;   // current map
+	};
+
+	/**
+	 * Puzzle solver
+	 */
+	class PuzzleSolver {
+	public:
+		PuzzleSolver(const Puzz &puzz);
+		int print_solutions(std::ostream& out, bool terminal);
+
+	private:
+		const Puzz &puzz;
 	};
 }

@@ -3,6 +3,7 @@
 #include <limits>
 #include <cstdlib>
 #include <cstring>
+#include <stdexcept>
 #include "puzzle.hpp"
 
 struct ExprType {
@@ -156,7 +157,7 @@ bool Puzzle::Puzz::Eval(const int *NumMap) const
 Puzzle::MapGen::MapGen(int DomSize, int CodSize) : n(CodSize), m(DomSize)
 {
 	if (CodSize < DomSize)
-		throw("There are no injektive maps if the codomain is smaller than the domain.");
+		throw std::domain_error("There are no injektive maps if the codomain is smaller than the domain.");
 	map = new int[DomSize];
 
 	// M0
@@ -219,4 +220,41 @@ bool Puzzle::MapGen::NextMap()
 	}
 
 	return true;
+}
+
+//------------------------------
+//        PUZZLE SOLVER
+//------------------------------
+Puzzle::PuzzleSolver::PuzzleSolver(const Puzz &puzz)
+	: puzz(puzz) {}
+
+int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
+{
+	int numSolutions = 0;
+
+	try {
+		MapGen Gen(puzz.DomainSize(), puzz.radix);
+
+		if (terminal)
+			out << "\e[1m";
+		for (int i=0; i<puzz.DomainSize(); ++i)
+			out << puzz[i] << ' ';
+		if (terminal)
+			out << "\e[0m";
+		out << std::endl;
+
+		do
+			if (puzz.Eval(*Gen)) {
+				++numSolutions;
+				for (int i=0; i<puzz.DomainSize(); ++i)
+					out << Gen[i] << ' ';
+				out << std::endl;
+			}
+		while (Gen.NextMap());
+	}
+	catch (const std::domain_error &err) {
+		out << "This alphametic has too many letters.\n\n";
+	}
+
+	return numSolutions;
 }
