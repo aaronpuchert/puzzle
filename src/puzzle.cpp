@@ -63,7 +63,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			type = NUMBER;
 			const char *end;
 			end = expr+len;
-			value = strtol(expr, (char **)&end, rad);	// ooh, dirty! (doesn't matter here)
+			value = strtol(expr, const_cast<char **>(&end), rad);
 			// LOW: catch errors?
 		}
 	}
