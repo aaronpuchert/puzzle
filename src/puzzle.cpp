@@ -210,7 +210,7 @@ Puzzle::MapGen::~MapGen()
 //     else {++a_j; while (j<m) a_{++j} <- a_{j-1}+1; goto M1}
 bool Puzzle::MapGen::NextMap()
 {
-	int j, l, k, Temp;
+	int j, l, k;
 
 	// M2
 	j = m-2;        // "j <- m-1"
@@ -219,14 +219,14 @@ bool Puzzle::MapGen::NextMap()
 		// M3
 		l = m-1;    // "l <- m"
 		while (map[j] >= map[l]) --l;
-		Temp = map[j]; map[j] = map[l]; map[l] = Temp;
+		std::swap(map[j], map[l]);
 	}
 
 	// M4
 	k = j+1;        // "k <- j+1"
 	l = m-1;        // "l <- m"
 	while (k<l) {
-		Temp = map[k]; map[k] = map[l]; map[l] = Temp;
+		std::swap(map[k], map[l]);
 		++k; --l;
 	}
 
