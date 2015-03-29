@@ -33,7 +33,11 @@ const char *puzzles[] = {
 	// Replaced umlauts, because puzzle works only with ASCII.
 	"GABEL+LOFFEL=IRRWEGE",
 	"GABEL+GABEL=ABZUGE",
-	"GABEL+MESSER=DOLLAR"
+	"GABEL+MESSER=DOLLAR",
+
+	// ZEITmagazin, 6/2015
+	"ZAUN+TUERE=MERLIN",
+	"ZAUN+TUERE=ELSTER"
 };
 
 const char *special[] = {
