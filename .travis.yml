@@ -1,11 +1,13 @@
 language: cpp
 compiler:
   - clang
+  - gcc
+dist: trusty
 sudo: false
 addons:
   apt:
     packages:
-      - libboost-test-dev
+      - libgtest-dev
 script:
   - make
   - make test

@@ -1,15 +1,28 @@
 #include "puzzle.hpp"
-#include <iostream>
-#define BOOST_TEST_MODULE SolverTest
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#include <sstream>
+#include <gtest/gtest.h>
 
-int testPuzzle(const char *puzzle)
+class PuzzleTest : public testing::TestWithParam<const char*> {};
+
+static testing::AssertionResult verifySolutions(
+	const char* solver_expr, const char* numSol_expr,
+	Puzzle::PuzzleSolver &solver, int numSol)
 {
-	Puzzle::Puzz puzz(puzzle, 10);
+	std::ostringstream str;
+	int actSol = solver.print_solutions(str, true);
+	if (actSol == numSol)
+		return testing::AssertionSuccess();
+	else
+		return testing::AssertionFailure()
+			<< "Expected: " << numSol << " solution(s) (" << numSol_expr << ")\n"
+			<< "  Actual: " << actSol << " solution(s)\n" << str.str();
+}
+
+TEST_P(PuzzleTest, Solve)
+{
+	Puzzle::Puzz puzz(GetParam(), 10);
 	Puzzle::PuzzleSolver solver(puzz);
-	std::cout << "Solving " << puzzle << std::endl;
-	return solver.print_solutions(std::cout, true);
+	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 
 const char *puzzles[] = {
@@ -49,8 +62,10 @@ const char *special[] = {
 	"A/BC+D/EF+G/HI=1",
 };
 
-BOOST_AUTO_TEST_CASE(solver_test)
+INSTANTIATE_TEST_CASE_P(PureTests, PuzzleTest, ::testing::ValuesIn(puzzles));
+
+int main(int argc, char **argv)
 {
-	for (int i = 0; i < (sizeof(puzzles)/sizeof(const char *)); ++i)
-		BOOST_CHECK(testPuzzle(puzzles[i]) == 1);
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

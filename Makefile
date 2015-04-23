@@ -23,7 +23,7 @@ $(TARGET): $(BUILDDIR)/ $(MAIN_OBJS)
 
 # Test binary
 $(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS)
-	$(CXX) $(LFLAGS) -lboost_unit_test_framework -o $@ $(TEST_OBJS)
+	$(CXX) $(LFLAGS) -lgtest -lpthread -o $@ $(TEST_OBJS)
 
 # Object files
 $(BUILDDIR)/%.o: src/%.cpp $(HPPS)
