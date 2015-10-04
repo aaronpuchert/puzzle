@@ -12,7 +12,7 @@ namespace Puzzle {
 	 */
 	class Expr {
 	public:
-		Expr(const char *expr, int len, const std::map<char, int> &transmap, int rad);
+		Expr(const char* expr, size_t len, const std::map<char, int> &transmap, int rad);
 		~Expr();
 		fraction<int> Eval(const int* NumMap) const;
 

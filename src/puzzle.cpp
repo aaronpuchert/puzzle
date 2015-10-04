@@ -17,8 +17,7 @@ enum class Puzzle::Expr::NodeType {
 	DIVIDE,
 	// FACTORIAL,
 	// BINOMIAL,   etc.
-	LEAF = 0x1000,      // dummy type
-	WORD,               // "fixed-value"/number leaf
+	WORD = 0x1000,      // "fixed-value"/number leaf
 	NUMBER              // "variable-value"/word leaf
 };
 
@@ -41,16 +40,16 @@ const Puzzle::Expr::ExprType Puzzle::Expr::ParseTable[] = {
 // IMPLEMENTATION OF EXPRESSIONS
 //------------------------------
 
-Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transmap, int rad)
+Puzzle::Expr::Expr(const char* expr, size_t len, const std::map<char, int> &transmap, int rad)
 {
-	type = NodeType::LEAF;
-	int split;
+	type = NodeType::WORD;
+	size_t split;
 	int priority = std::numeric_limits<int>::max();
 
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
-	for (int i=0; i<len; ++i)
-		for (int op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
+	for (size_t i=0; i<len; ++i)
+		for (size_t op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
 			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
 				split = i;
@@ -58,17 +57,17 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			}
 
 	// split expression and process parts recursively
-	if (type != NodeType::LEAF) {
+	if (type != NodeType::WORD) {
 		left = new Expr(expr, split, transmap, rad);
 		right = new Expr(expr+split+1, len-split-1, transmap, rad);
 	}
 	else {
 		// word or number?
-		int i;
+		size_t i;
 		for (i=0; i<len; ++i)
 			if (expr[i] >= '0' && expr[i] <= '9')
 				break;
-		if (i == len) {	 // word
+		if (i == len) {  // word
 			type = NodeType::WORD;
 			word = new int[len+1];
 			for (i=0; i<len; ++i)
@@ -76,7 +75,7 @@ Puzzle::Expr::Expr(const char* expr, int len, const std::map<char, int> &transma
 			word[len] = -1;
 			radix = rad;
 		}
-		else {			 // number
+		else {           // number
 			type = NodeType::NUMBER;
 			const char *end;
 			end = expr+len;
@@ -128,6 +127,8 @@ fraction<int> Puzzle::Expr::Eval(const int *NumMap) const
 			return fraction<int>(res);
 		case NodeType::NUMBER:
 			return fraction<int>(value);
+		default:
+			throw std::logic_error("Invalid node type");
 	}
 }
 
@@ -140,7 +141,7 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 	// fill Map
 	std::map<char, int> Map;
 	for (int i=0; puzzle[i]; ++i)
-		if (puzzle[i]>='A' && puzzle[i]<='Z')				// what about nondecimal digits?
+		if (puzzle[i]>='A' && puzzle[i]<='Z')   // what about nondecimal digits?
 			Map.insert(std::pair<char, int>(puzzle[i], -1));
 
 	// assign numbers to letters
@@ -151,7 +152,7 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 	}
 
 	// make syntax tree
-	root = new Expr(puzzle, (int)strlen(puzzle), Map, rad);
+	root = new Expr(puzzle, strlen(puzzle), Map, rad);
 
 	// leading digits aren't allowed to be zero
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
