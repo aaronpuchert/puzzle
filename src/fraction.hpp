@@ -1,27 +1,8 @@
-// GENERIC EUCLIDEAN ALGORITHM FOR TYPES WITH %
-template<typename T> inline T gcd (T a, T b)
-{
-	T c;
-	while (b != 0) {
-		c = a % b;
-		a = b;
-		b = c;
-	}
-
-	return a;
-}
-
 // GENERIC FRACTION TYPE
 template<typename T> struct fraction {
 	T num, denom;
 
-	fraction(T Num, T Denom=1)
-	{
-		T g = gcd(Num, Denom);
-
-		num = Num / g;
-		denom = Denom / g;
-	};
+	fraction(T Num, T Denom=1) : num(Num), denom(Denom) {}
 
 	fraction<T> operator -() const {return fraction<T>(-num, denom);}
 	operator bool() const {return (num != 0);}
