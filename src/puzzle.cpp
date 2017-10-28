@@ -48,8 +48,8 @@ Puzzle::Expr::Expr(const char* expr, size_t len, const std::map<char, int> &tran
 
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
-	for (size_t i=0; i<len; ++i)
-		for (size_t op=0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
+	for (size_t i = 0; i < len; ++i)
+		for (size_t op = 0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
 			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
 				split = i;
@@ -64,14 +64,14 @@ Puzzle::Expr::Expr(const char* expr, size_t len, const std::map<char, int> &tran
 	else {
 		// word or number?
 		size_t i;
-		for (i=0; i<len; ++i)
+		for (i = 0; i < len; ++i)
 			if (expr[i] >= '0' && expr[i] <= '9')
 				break;
 		if (i == len) {  // word
 			type = NodeType::WORD;
 			word = new int[len+1];
-			for (i=0; i<len; ++i)
-				word[i] = transmap.find(expr[(len-1)-i])->second;
+			for (i = 0; i < len; ++i)
+				word[i] = transmap.find(expr[(len-1) - i])->second;
 			word[len] = -1;
 			radix = rad;
 		}
@@ -120,8 +120,8 @@ fraction<int64_t> Puzzle::Expr::Eval(const int *NumMap) const
 		case NodeType::DIVIDE:
 			return left->Eval(NumMap) / right->Eval(NumMap);
 		case NodeType::WORD:
-			for (size_t i=0; word[i]>=0; ++i) {
-				res += NumMap[word[i]]*val;
+			for (size_t i = 0; word[i] >= 0; ++i) {
+				res += NumMap[word[i]] * val;
 				val *= radix;
 			}
 			return fraction<int64_t>(res);
@@ -140,8 +140,8 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 {
 	// fill Map
 	std::map<char, int> Map;
-	for (int i=0; puzzle[i]; ++i)
-		if (puzzle[i]>='A' && puzzle[i]<='Z')   // what about nondecimal digits?
+	for (int i = 0; puzzle[i]; ++i)
+		if (puzzle[i] >= 'A' && puzzle[i] <= 'Z')   // what about nondecimal digits?
 			Map.insert(std::pair<char, int>(puzzle[i], -1));
 
 	// assign numbers to letters
@@ -157,7 +157,7 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 	// leading digits aren't allowed to be zero
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
 		leading[Map[puzzle[0]]] = true;
-	for (int i=1; puzzle[i]; ++i)
+	for (int i = 1; puzzle[i]; ++i)
 		if (puzzle[i-1] < 'A' && puzzle[i] >= 'A' && puzzle[i] <= 'Z')
 			leading[Map[puzzle[i]]] = true;
 }
@@ -169,7 +169,7 @@ Puzzle::Puzz::~Puzz()
 
 bool Puzzle::Puzz::Eval(const int *NumMap) const
 {
-	for (int i=0; i<radix; ++i)
+	for (int i = 0; i < radix; ++i)
 		if (!NumMap[i] && leading[i])
 			return false;
 	return (bool)(root->Eval(NumMap));
@@ -185,7 +185,7 @@ Puzzle::MapGen::MapGen(int DomSize, int CodSize) : n(CodSize), m(DomSize)
 	map = new int[DomSize];
 
 	// M0
-	for (int i=0; i<DomSize; ++i)
+	for (int i = 0; i < DomSize; ++i)
 		map[i] = i;
 }
 
@@ -214,32 +214,37 @@ bool Puzzle::MapGen::NextMap()
 	int j, l, k;
 
 	// M2
-	j = m-2;        // "j <- m-1"
-	while (j>=0 && (map[j] >= map[j+1])) --j;
+	j = m - 2;      // "j <- m-1"
+	while (j >= 0 && (map[j] >= map[j+1]))
+		--j;
 	if (j >= 0) {
 		// M3
-		l = m-1;    // "l <- m"
-		while (map[j] >= map[l]) --l;
+		l = m - 1;  // "l <- m"
+		while (map[j] >= map[l])
+			--l;
 		std::swap(map[j], map[l]);
 	}
 
 	// M4
-	k = j+1;        // "k <- j+1"
-	l = m-1;        // "l <- m"
-	while (k<l) {
+	k = j + 1;      // "k <- j+1"
+	l = m - 1;      // "l <- m"
+	while (k < l) {
 		std::swap(map[k], map[l]);
 		++k; --l;
 	}
 
 	if (j < 0) {
 		// M5
-		j = m-1;    // "j <- m"
+		j = m - 1;  // "j <- m"
 		int diff = n-m;
-		while (j>=0 && (map[j] == j+diff)) --j;
-		if (j<0) return false;
+		while (j >= 0 && (map[j] == j+diff))
+			--j;
+		if (j < 0)
+			return false;
 		else {
 			l = map[j];
-			while (j<m) map[j++] = ++l;
+			while (j < m)
+				map[j++] = ++l;
 		}
 	}
 
@@ -261,7 +266,7 @@ int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 
 		if (terminal)
 			out << "\e[1m";
-		for (int i=0; i<puzz.DomainSize(); ++i)
+		for (int i = 0; i < puzz.DomainSize(); ++i)
 			out << puzz[i] << ' ';
 		if (terminal)
 			out << "\e[0m";
@@ -270,7 +275,7 @@ int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 		do
 			if (puzz.Eval(*Gen)) {
 				++numSolutions;
-				for (int i=0; i<puzz.DomainSize(); ++i)
+				for (int i = 0; i < puzz.DomainSize(); ++i)
 					out << Gen[i] << ' ';
 				out << std::endl;
 			}

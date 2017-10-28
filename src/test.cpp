@@ -51,6 +51,6 @@ const char *special[] = {
 
 BOOST_AUTO_TEST_CASE(solver_test)
 {
-	for (int i=0; i<(sizeof(puzzles)/sizeof(const char *)); ++i)
+	for (int i = 0; i < (sizeof(puzzles)/sizeof(const char *)); ++i)
 		BOOST_CHECK(testPuzzle(puzzles[i]) == 1);
 }

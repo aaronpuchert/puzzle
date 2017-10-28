@@ -2,7 +2,7 @@
 template<typename T> struct fraction {
 	T num, denom;
 
-	fraction(T Num, T Denom=1) : num(Num), denom(Denom) {}
+	fraction(T Num, T Denom = 1) : num(Num), denom(Denom) {}
 
 	fraction<T> operator -() const {return fraction<T>(-num, denom);}
 	operator bool() const {return (num != 0);}
