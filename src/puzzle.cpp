@@ -104,13 +104,13 @@ Puzzle::Expr::~Expr()
 	}
 }
 
-fraction<int> Puzzle::Expr::Eval(const int *NumMap) const
+fraction<int64_t> Puzzle::Expr::Eval(const int *NumMap) const
 {
-	int res=0, val=1;
+	int64_t res = 0, val = 1;
 
 	switch (type) {
 		case NodeType::EQUAL:
-			return (fraction<int>)(left->Eval(NumMap) == right->Eval(NumMap));
+			return (fraction<int64_t>)(left->Eval(NumMap) == right->Eval(NumMap));
 		case NodeType::PLUS:
 			return left->Eval(NumMap) + right->Eval(NumMap);
 		case NodeType::MINUS:
@@ -120,13 +120,13 @@ fraction<int> Puzzle::Expr::Eval(const int *NumMap) const
 		case NodeType::DIVIDE:
 			return left->Eval(NumMap) / right->Eval(NumMap);
 		case NodeType::WORD:
-			for (int i=0; word[i]>=0; ++i) {
+			for (size_t i=0; word[i]>=0; ++i) {
 				res += NumMap[word[i]]*val;
 				val *= radix;
 			}
-			return fraction<int>(res);
+			return fraction<int64_t>(res);
 		case NodeType::NUMBER:
-			return fraction<int>(value);
+			return fraction<int64_t>(value);
 		default:
 			throw std::logic_error("Invalid node type");
 	}

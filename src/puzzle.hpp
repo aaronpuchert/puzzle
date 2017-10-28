@@ -14,7 +14,7 @@ namespace Puzzle {
 	public:
 		Expr(const char* expr, size_t len, const std::map<char, int> &transmap, int rad);
 		~Expr();
-		fraction<int> Eval(const int* NumMap) const;
+		fraction<int64_t> Eval(const int* NumMap) const;
 
 	private:
 		// Node types
@@ -36,7 +36,7 @@ namespace Puzzle {
 				int radix;
 			};
 			// number leaf
-			int value;
+			int64_t value;
 		};
 	};
 
