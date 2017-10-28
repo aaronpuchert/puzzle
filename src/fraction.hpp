@@ -1,3 +1,6 @@
+#ifndef FRACTION_HPP
+#define FRACTION_HPP
+
 // GENERIC FRACTION TYPE
 template<typename T> struct fraction {
 	T num, denom;
@@ -37,3 +40,5 @@ bool operator ==(const fraction<T> &a, const fraction<T> &b)
 {
 	return a.num * b.denom == a.denom * b.num;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef PUZZLE_HPP
+#define PUZZLE_HPP
+
 //------------------------------
 //  PUZZLE SOLVER MAIN HEADER
 //------------------------------
@@ -90,3 +93,5 @@ namespace Puzzle {
 
 	// LOW: exceptions...
 }
+
+#endif
