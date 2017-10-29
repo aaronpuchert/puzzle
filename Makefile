@@ -28,16 +28,15 @@ TEST_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(TEST))
 # So we have to compile it for ourselves first. Well that is fun.
 ifdef GTEST_PREFIX
 GTEST_DIR = $(GTEST_PREFIX)/src/gtest
-GTEST_SRC = gtest-all.cc
-GTEST_OBJ = $(BUILDDIR)/gtest-all.o
+GTEST_OBJ = $(BUILDDIR)/gtest-all.o $(BUILDDIR)/gtest_main.o
 GTEST = $(GTEST_OBJ)
 ifneq ($(GTEST_PREFIX),/usr)
 CXXFLAGS += -I$(GTEST_PREFIX)/include
 endif
-$(GTEST_OBJ): $(GTEST_DIR)/src/gtest-all.cc
-	$(CXX) -c $(CXXFLAGS) -I$(GTEST_DIR) -o $@ $(GTEST_DIR)/src/gtest-all.cc
+$(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc
+	$(CXX) -c $(CXXFLAGS) -I$(GTEST_DIR) -o $@ $^
 else
-GTEST = -lgtest
+GTEST = -lgtest -lgtest_main
 endif
 
 # Main target
