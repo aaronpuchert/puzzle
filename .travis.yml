@@ -8,6 +8,9 @@ addons:
   apt:
     packages:
       - libgtest-dev
+env:
+  - VARIANT=debug
+  - VARIANT=release
 script:
   - make
   - make GTEST_PREFIX=/usr test

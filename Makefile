@@ -1,11 +1,18 @@
 # Settings
-#DEBUG = -g
-CXXFLAGS = -Wall -std=c++11 -O3 $(DEBUG)
+VARIANT ?= release
+ifeq ($(VARIANT),release)
+ADDITIONAL_FLAGS = -O2 -DNDEBUG
+else ifeq ($(VARIANT),debug)
+ADDITIONAL_FLAGS = -ggdb3
+else
+ADDITIONAL_FLAGS = $(error Unknown variant, set VARIANT={debug|release})
+endif
+CXXFLAGS = -Wall -std=c++11 -O3 $(ADDITIONAL_FLAGS)
 LFLAGS = -Wall $(DEBUG)
 
 # Files
-BUILDDIR = build
-TARGET = puzzle
+BUILDDIR = $(VARIANT)
+TARGET = $(BUILDDIR)/puzzle
 TEST_TARGET = $(BUILDDIR)/test
 
 CPPS = src/puzzle.cpp
