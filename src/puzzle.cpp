@@ -1,7 +1,6 @@
 #include <utility>
 #include <iterator>
 #include <limits>
-#include <cstdlib>
 #include <cstring>
 #include <stdexcept>
 #include "puzzle.hpp"
@@ -115,9 +114,12 @@ private:
 class NumberExpr : public Expression
 {
 public:
-	NumberExpr(const char* begin, const char* end, int radix)
+	NumberExpr(const char* begin, const char* end, int radix) : value(0)
 	{
-		value = strtol(begin, const_cast<char **>(&end), radix);
+		for (const char *cur = begin; cur != end; ++cur) {
+			value *= radix;
+			value += *cur - '0';
+		}
 	}
 
 	fraction<int64_t> eval(const int*) const override
