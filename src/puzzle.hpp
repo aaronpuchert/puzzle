@@ -6,6 +6,7 @@
 //------------------------------
 #include <vector>
 #include <map>
+#include <memory>
 #include <ostream>
 #include "fraction.hpp"
 
@@ -13,35 +14,29 @@ namespace Puzzle {
 	/**
 	 * Expression type
 	 */
-	class Expr {
+	class Expression
+	{
 	public:
-		Expr(const char* expr, size_t len, const std::map<char, int> &transmap, int rad);
-		~Expr();
-		fraction<int64_t> Eval(const int* NumMap) const;
+		virtual ~Expression();
+		virtual fraction<int64_t> eval(const int *assignment) const = 0;
+	};
+
+	class ExpressionParser
+	{
+	public:
+		ExpressionParser(const std::map<char, int> &transmap, int radix)
+			: transmap(transmap), radix(radix) {}
+		std::unique_ptr<Expression> parse(const char *expr);
 
 	private:
-		// Node types
-		enum class NodeType;
-		NodeType type;
+		std::unique_ptr<Expression> parse(const char *begin, const char *end);
 
-		// Internal parser table
-		struct ExprType;
-		static const ExprType ParseTable[];
-
-		union {
-			// inner nodes
-			struct {
-				Expr *left, *right;
-			};
-			// word leaf
-			struct {
-				int *word;
-				int radix;
-			};
-			// number leaf
-			int64_t value;
-		};
+		const std::map<char, int> &transmap;
+		int radix;
 	};
+	std::unique_ptr<Expression> parse(
+		const char* expr, size_t len,
+		const std::map<char, int> &transmap, int radix);
 
 	/**
 	 * Puzzle data structure
@@ -49,8 +44,7 @@ namespace Puzzle {
 	class Puzz {
 	public:
 		Puzz(const char *puzzle, int rad);
-		~Puzz();
-		bool Eval(const int *NumMap) const;
+		bool eval(const int *assignment) const;
 		int DomainSize() const {return num;}
 		char operator[](int n) const {return lettermap[n];}
 
@@ -59,7 +53,7 @@ namespace Puzzle {
 		int num;
 		std::vector<char> lettermap;
 		std::vector<bool> leading;
-		Expr *root;
+		std::unique_ptr<Expression> root;
 	};
 
 	/**

@@ -6,10 +6,137 @@
 #include <stdexcept>
 #include "puzzle.hpp"
 
+/// We don't want to rely on C++14 yet.
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+namespace Puzzle {
+
+// BEGIN Implementation of Expressions
+
+Expression::~Expression() = default;
+
+class BinaryExpr : public Expression
+{
+protected:
+	BinaryExpr(std::unique_ptr<Expression> left,
+	           std::unique_ptr<Expression> right)
+		: left(std::move(left)), right(std::move(right)) {}
+
+	std::unique_ptr<Expression> left, right;
+};
+
+class EqualsExpr : public BinaryExpr
+{
+public:
+	EqualsExpr(std::unique_ptr<Expression> left,
+	           std::unique_ptr<Expression> right)
+		: BinaryExpr(std::move(left), std::move(right)) {}
+
+	fraction<int64_t> eval(const int *assignment) const override
+		{ return left->eval(assignment) == right->eval(assignment); }
+};
+
+class SumExpr : public BinaryExpr
+{
+public:
+	SumExpr(std::unique_ptr<Expression> left,
+	        std::unique_ptr<Expression> right)
+		: BinaryExpr(std::move(left), std::move(right)) {}
+
+	fraction<int64_t> eval(const int *assignment) const override
+		{ return left->eval(assignment) + right->eval(assignment); }
+};
+
+class DifferenceExpr : public BinaryExpr
+{
+public:
+	DifferenceExpr(std::unique_ptr<Expression> left,
+	               std::unique_ptr<Expression> right)
+		: BinaryExpr(std::move(left), std::move(right)) {}
+
+	fraction<int64_t> eval(const int *assignment) const override
+		{ return left->eval(assignment) - right->eval(assignment); }
+};
+
+class ProductExpr : public BinaryExpr
+{
+public:
+	ProductExpr(std::unique_ptr<Expression> left,
+	            std::unique_ptr<Expression> right)
+		: BinaryExpr(std::move(left), std::move(right)) {}
+
+	fraction<int64_t> eval(const int *assignment) const override
+		{ return left->eval(assignment) * right->eval(assignment); }
+};
+
+class QuotientExpr : public BinaryExpr
+{
+public:
+	QuotientExpr(std::unique_ptr<Expression> left,
+	             std::unique_ptr<Expression> right)
+		: BinaryExpr(std::move(left), std::move(right)) {}
+
+	fraction<int64_t> eval(const int *assignment) const override
+		{ return left->eval(assignment) / right->eval(assignment); }
+};
+
+class WordExpr : public Expression
+{
+public:
+	WordExpr(const char *begin, const char *end,
+	         const std::map<char, int> &transmap, int radix)
+		: word(new int[std::distance(begin, end) + 1]), radix(radix)
+	{
+		size_t len = std::distance(begin, end);
+		for (size_t i = 0; i < len; ++i)
+			word[i] = transmap.at(begin[(len-1) - i]);
+		word[len] = -1;
+	}
+
+	fraction<int64_t> eval(const int *assignment) const override
+	{
+		int64_t res = 0, val = 1;
+		for (size_t i = 0; word[i] >= 0; ++i) {
+			res += assignment[word[i]] * val;
+			val *= radix;
+		}
+		return fraction<int64_t>(res);
+	}
+
+private:
+	std::unique_ptr<int[]> word;
+	int radix;
+};
+
+class NumberExpr : public Expression
+{
+public:
+	NumberExpr(const char* begin, const char* end, int radix)
+	{
+		value = strtol(begin, const_cast<char **>(&end), radix);
+	}
+
+	fraction<int64_t> eval(const int*) const override
+	{
+		return fraction<int64_t>(value);
+	}
+
+private:
+	int64_t value;
+};
+
+// END Implementation of Expressions
+
+// BEGIN Implementation of ExpressionParser
+
 /**
  * Parser data
  */
-enum class Puzzle::Expr::NodeType {
+enum class NodeType {
 	EQUAL = 0,          // should occur exactly once - at root
 	PLUS,
 	MINUS,
@@ -21,116 +148,75 @@ enum class Puzzle::Expr::NodeType {
 	NUMBER              // "variable-value"/word leaf
 };
 
-struct Puzzle::Expr::ExprType {
+struct ExprType {
 	char op;
-	Puzzle::Expr::NodeType type;
+	NodeType type;
 	int priority;
 };
 
-// LOW: what about a std::map?
-const Puzzle::Expr::ExprType Puzzle::Expr::ParseTable[] = {
-	{'=', Puzzle::Expr::NodeType::EQUAL, 0},
-	{'+', Puzzle::Expr::NodeType::PLUS, 1},
-	{'-', Puzzle::Expr::NodeType::MINUS, 1},
-	{'*', Puzzle::Expr::NodeType::MULTIPLY, 2},
-	{'/', Puzzle::Expr::NodeType::DIVIDE, 2}
+static const ExprType ParseTable[] = {
+	{'=', NodeType::EQUAL, 0},
+	{'+', NodeType::PLUS, 1},
+	{'-', NodeType::MINUS, 1},
+	{'*', NodeType::MULTIPLY, 2},
+	{'/', NodeType::DIVIDE, 2}
 };
 
-//------------------------------
-// IMPLEMENTATION OF EXPRESSIONS
-//------------------------------
-
-Puzzle::Expr::Expr(const char* expr, size_t len, const std::map<char, int> &transmap, int rad)
+std::unique_ptr<Expression> ExpressionParser::parse(const char *expr)
 {
-	type = NodeType::WORD;
-	size_t split;
+	return parse(expr, expr + strlen(expr));
+}
+
+std::unique_ptr<Expression> ExpressionParser::parse(
+	const char *begin, const char *end)
+{
+	NodeType type = NodeType::WORD;
+	const char *split;
 	int priority = std::numeric_limits<int>::max();
 
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
-	for (size_t i = 0; i < len; ++i)
+	for (const char *cur = begin; cur != end; ++cur)
 		for (size_t op = 0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
-			if (expr[i] == ParseTable[op].op && priority >= ParseTable[op].priority) {
+			if (*cur == ParseTable[op].op && priority >= ParseTable[op].priority) {
 				type = ParseTable[op].type;
-				split = i;
+				split = cur;
 				priority = ParseTable[op].priority;
 			}
 
 	// split expression and process parts recursively
 	if (type != NodeType::WORD) {
-		left = new Expr(expr, split, transmap, rad);
-		right = new Expr(expr+split+1, len-split-1, transmap, rad);
+		auto left = parse(begin, split);
+		auto right = parse(split+1, end);
+		switch (type) {
+			case NodeType::EQUAL:
+				return make_unique<EqualsExpr>(std::move(left), std::move(right));
+			case NodeType::PLUS:
+				return make_unique<SumExpr>(std::move(left), std::move(right));
+			case NodeType::MINUS:
+				return make_unique<DifferenceExpr>(std::move(left), std::move(right));
+			case NodeType::MULTIPLY:
+				return make_unique<ProductExpr>(std::move(left), std::move(right));
+			case NodeType::DIVIDE:
+				return make_unique<QuotientExpr>(std::move(left), std::move(right));
+			default:
+				throw std::runtime_error("Unreachable code location");
+		}
 	}
 	else {
-		// word or number?
-		size_t i;
-		for (i = 0; i < len; ++i)
-			if (expr[i] >= '0' && expr[i] <= '9')
+		// Is it a word or number?
+		const char *cur;
+		for (cur = begin; cur != end; ++cur)
+			if (*cur >= '0' && *cur <= '9')
 				break;
-		if (i == len) {  // word
-			type = NodeType::WORD;
-			word = new int[len+1];
-			for (i = 0; i < len; ++i)
-				word[i] = transmap.find(expr[(len-1) - i])->second;
-			word[len] = -1;
-			radix = rad;
-		}
-		else {           // number
-			type = NodeType::NUMBER;
-			const char *end;
-			end = expr+len;
-			value = strtol(expr, const_cast<char **>(&end), rad);
-			// LOW: catch errors?
-		}
+		if (cur == end)
+			return make_unique<WordExpr>(begin, end, transmap, radix);
+		else
+			return make_unique<NumberExpr>(begin, end, radix);
 	}
 }
 
-Puzzle::Expr::~Expr()
-{
-	switch (type) {
-	case NodeType::WORD:      // leaf
-		delete word;
-		break;
-	case NodeType::NUMBER:
-		break;
-	case NodeType::EQUAL:
-	case NodeType::PLUS:
-	case NodeType::MINUS:
-	case NodeType::MULTIPLY:
-	case NodeType::DIVIDE:    // inner node
-		delete left;
-		delete right;
-		break;
-	}
-}
-
-fraction<int64_t> Puzzle::Expr::Eval(const int *NumMap) const
-{
-	int64_t res = 0, val = 1;
-
-	switch (type) {
-		case NodeType::EQUAL:
-			return (fraction<int64_t>)(left->Eval(NumMap) == right->Eval(NumMap));
-		case NodeType::PLUS:
-			return left->Eval(NumMap) + right->Eval(NumMap);
-		case NodeType::MINUS:
-			return left->Eval(NumMap) - right->Eval(NumMap);
-		case NodeType::MULTIPLY:
-			return left->Eval(NumMap) * right->Eval(NumMap);
-		case NodeType::DIVIDE:
-			return left->Eval(NumMap) / right->Eval(NumMap);
-		case NodeType::WORD:
-			for (size_t i = 0; word[i] >= 0; ++i) {
-				res += NumMap[word[i]] * val;
-				val *= radix;
-			}
-			return fraction<int64_t>(res);
-		case NodeType::NUMBER:
-			return fraction<int64_t>(value);
-		default:
-			throw std::logic_error("Invalid node type");
-	}
-}
+// END Implementation of ExpressionParser
 
 //------------------------------
 //  IMPLEMENTATION OF PUZZLES
@@ -152,7 +238,8 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 	}
 
 	// make syntax tree
-	root = new Expr(puzzle, strlen(puzzle), Map, rad);
+	ExpressionParser parser(Map, rad);
+	root = parser.parse(puzzle);
 
 	// leading digits aren't allowed to be zero
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
@@ -162,17 +249,12 @@ Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), le
 			leading[Map[puzzle[i]]] = true;
 }
 
-Puzzle::Puzz::~Puzz()
-{
-	delete root;
-}
-
-bool Puzzle::Puzz::Eval(const int *NumMap) const
+bool Puzzle::Puzz::eval(const int *assignment) const
 {
 	for (int i = 0; i < radix; ++i)
-		if (!NumMap[i] && leading[i])
+		if (!assignment[i] && leading[i])
 			return false;
-	return (bool)(root->Eval(NumMap));
+	return root->eval(assignment) != 0;
 }
 
 //------------------------------
@@ -273,7 +355,7 @@ int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 		out << std::endl;
 
 		do
-			if (puzz.Eval(*Gen)) {
+			if (puzz.eval(*Gen)) {
 				++numSolutions;
 				for (int i = 0; i < puzz.DomainSize(); ++i)
 					out << Gen[i] << ' ';
@@ -286,4 +368,6 @@ int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 	}
 
 	return numSolutions;
+}
+
 }
