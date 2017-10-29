@@ -10,4 +10,4 @@ addons:
       - libgtest-dev
 script:
   - make
-  - make test
+  - make GTEST_PREFIX=/usr test

@@ -1,6 +1,6 @@
 # Settings
 #DEBUG = -g
-CFLAGS = -Wall -std=c++11 -O3 $(DEBUG)
+CXXFLAGS = -Wall -std=c++11 -O3 $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
 
 # Files
@@ -17,17 +17,33 @@ HPPS = $(patsubst %,src/%,$(HEADERS))
 MAIN_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(MAIN))
 TEST_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(TEST))
 
+# Google Test shenanigans. Some distributions don't provide libgtest.so.
+# So we have to compile it for ourselves first. Well that is fun.
+ifdef GTEST_PREFIX
+GTEST_DIR = $(GTEST_PREFIX)/src/gtest
+GTEST_SRC = gtest-all.cc
+GTEST_OBJ = $(BUILDDIR)/gtest-all.o
+GTEST = $(GTEST_OBJ)
+ifneq ($(GTEST_PREFIX),/usr)
+CXXFLAGS += -I$(GTEST_PREFIX)/include
+endif
+$(GTEST_OBJ): $(GTEST_DIR)/src/gtest-all.cc
+	$(CXX) -c $(CXXFLAGS) -I$(GTEST_DIR) -o $@ $(GTEST_DIR)/src/gtest-all.cc
+else
+GTEST = -lgtest
+endif
+
 # Main target
 $(TARGET): $(BUILDDIR)/ $(MAIN_OBJS)
 	$(CXX) $(LFLAGS) -o $@ $(MAIN_OBJS)
 
 # Test binary
-$(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS)
-	$(CXX) $(LFLAGS) -lgtest -lpthread -o $@ $(TEST_OBJS)
+$(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS) $(GTEST_OBJ)
+	$(CXX) $(LFLAGS) $(GTEST) -lpthread -o $@ $(TEST_OBJS)
 
 # Object files
 $(BUILDDIR)/%.o: src/%.cpp $(HPPS)
-	$(CXX) -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 $(BUILDDIR)/:
 	mkdir $(BUILDDIR)
