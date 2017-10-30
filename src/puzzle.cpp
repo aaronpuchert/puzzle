@@ -261,61 +261,66 @@ bool Puzzle::eval(const int *assignment) const
 
 // BEGIN Implementation of Permutation generator
 
+// The following algorithm is inspired by Donald E. Knuth: The Art of Computer
+// Programming, Vol. 4, Fasc. 2, Algorithm L; but slightly modified.
+// Algorithm M: Visit all injective maps f from {1, ..., m} to {1, ..., n},
+// given m<n. Idea: Run through all m-subsets of {1, ..., n} and visit all
+// permutations of these subsets for each one. Running through all m-subsets is
+// done by a "combination-enumeration" algorithm which outputs all combinations
+// in a canonical order. Running through all permutations of these subsets is
+// done by Alg. L.
+// M0. Start with map (a₁, ..., aₘ) = (1, ..., m).
+// M1. Visit map (a₁, ..., aₘ)
+// M2. [Find j] j ← m-1; while (aⱼ ≥ aⱼ₊₁}) --j;
+//     if (j=0) goto M4;
+// M3. [Next aⱼ] l ← n; while (aⱼ ≥ aₗ) --l; aⱼ ↔ aₗ;
+// M4. [Reverse aⱼ₊₁}, ..., aₘ] k ← j + 1; l ← m;
+//     while (k < l) {aₖ ↔ aₗ, k++, l--} if (j > 0) goto M1.
+// M5. [Next combination] j ← m; while (aⱼ == j+(n-m)) --j;
+//     if (j=0) finished;
+//     else {++aⱼ; while (j<m) a₊₊ⱼ ← aⱼ₋₁ + 1; goto M1}
+
 MapGen::MapGen(int domainSize, int codomainSize)
 	: n(codomainSize), m(domainSize), map(new int[domainSize])
 {
 	if (codomainSize < domainSize)
-		throw std::domain_error("There are no injective maps if the codomain is smaller than the domain.");
+		throw std::domain_error("There are no injective maps if the codomain "
+		                        "is smaller than the domain.");
 
-	// M0
+	// M0. Start with map (a₁, ..., aₘ) = (1, ..., m).
 	for (int i = 0; i < domainSize; ++i)
 		map[i] = i;
 }
 
 MapGen::~MapGen() = default;
 
-//---------------------------  ALGORITHM DESCRIPTION  -------------------------
-// (The following algorithm is inspired by Donald E. Knuth: The Art of Computer Programming, Vol. 4, Fasc. 2, Algorithm L; but slightly modified)
-// Algorithm M: Visit all injective maps f from {1, ..., m} to {1, ..., n}, given m<n.
-// Idea: Run through all m-subsets of {1, ..., n} and visit all permutations of these subsets for each one.
-//   Running through all m-subsets is done by a "combination-enumeration" algorithm which outputs all combinations in a canonical order.
-//   Running through all permutations of these subsets is done by Alg. L.
-// M0. start with map (a_1, ..., a_m) = (1, ..., m).
-// M1. visit map (a_1, ..., a_m)
-// M2. [Find j] j <- m-1; while (a_j >= a_{j+1}) --j;
-//     if (j=0) goto M4;
-// M3. [Next a_j] l <- n; while (a_j >= a_l) --l; a_j <-> a_l;
-// M4. [Reverse a_{j+1}, ..., a_m] k<-j+1; l<-m; while (k<l) {a_k <-> a_l, k++, l--} if (j>0) goto M1.
-// M5. [Next combination] j <- m; while (a_j == j+(n-m)) --j;
-//     if (j=0) finished;
-//     else {++a_j; while (j<m) a_{++j} <- a_{j-1}+1; goto M1}
 bool MapGen::nextMap()
 {
 	int j, l, k;
 
-	// M2
-	j = m - 2;      // "j <- m-1"
+	// M2. Find j.
+	j = m - 2;      // "j ← m-1"
 	while (j >= 0 && (map[j] >= map[j+1]))
 		--j;
 	if (j >= 0) {
-		// M3
-		l = m - 1;  // "l <- m"
+		// M3. Next aⱼ.
+		l = m - 1;  // "l ← m"
 		while (map[j] >= map[l])
 			--l;
 		std::swap(map[j], map[l]);
 	}
 
-	// M4
-	k = j + 1;      // "k <- j+1"
-	l = m - 1;      // "l <- m"
+	// M4. Reverse aⱼ₊₁, ..., aₘ.
+	k = j + 1;      // "k ← j+1"
+	l = m - 1;      // "l ← m"
 	while (k < l) {
 		std::swap(map[k], map[l]);
 		++k; --l;
 	}
 
 	if (j < 0) {
-		// M5
-		j = m - 1;  // "j <- m"
+		// M5. Next combination.
+		j = m - 1;  // "j ← m"
 		int diff = n-m;
 		while (j >= 0 && (map[j] == j+diff))
 			--j;
