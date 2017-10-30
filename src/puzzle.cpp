@@ -220,30 +220,28 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 
 // END Implementation of ExpressionParser
 
-//------------------------------
-//  IMPLEMENTATION OF PUZZLES
-//------------------------------
+// BEGIN Implementation of Puzzle
 
-Puzzle::Puzzle(const char *puzzle, int rad) : radix(rad), indexToLetter(rad), leading(rad)
+Puzzle::Puzzle(const char *puzzle, int rad)
+	: radix(rad), numLetters(0), indexToLetter(rad), leading(rad)
 {
-	// fill Map
+	// Collect letters.
 	std::map<char, int> letterToIndex;
-	for (int i = 0; puzzle[i]; ++i)
-		if (puzzle[i] >= 'A' && puzzle[i] <= 'Z')   // what about nondecimal digits?
-			letterToIndex.insert(std::pair<char, int>(puzzle[i], -1));
+	for (const char *cur = puzzle; *cur; ++cur)
+		if (*cur >= 'A' && *cur <= 'Z')
+			letterToIndex[*cur];
 
-	// assign numbers to letters
-	numLetters = 0;
-	for (auto it = letterToIndex.begin(); it != letterToIndex.end(); ++it, ++numLetters) {
-		indexToLetter[numLetters] = it->first;
-		it->second = numLetters;
+	// Assign numbers to letters.
+	for (auto &pair : letterToIndex) {
+		indexToLetter[numLetters] = pair.first;
+		pair.second = numLetters++;
 	}
 
-	// make syntax tree
+	// Make syntax tree.
 	ExpressionParser parser(letterToIndex, rad);
 	root = parser.parse(puzzle);
 
-	// leading digits aren't allowed to be zero
+	// Leading digits aren't allowed to be zero.
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
 		leading[letterToIndex[puzzle[0]]] = true;
 	for (int i = 1; puzzle[i]; ++i)
@@ -258,6 +256,8 @@ bool Puzzle::eval(const int *assignment) const
 			return false;
 	return root->eval(assignment) != 0;
 }
+
+// END Implementation of Puzzle
 
 //------------------------------
 // PERMUTATION GENERATOR IMPLEMENTATION
