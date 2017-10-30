@@ -34,9 +34,6 @@ namespace Puzzle {
 		const std::map<char, int> &letterToIndex;
 		int radix;
 	};
-	std::unique_ptr<Expression> parse(
-		const char* expr, size_t len,
-		const std::map<char, int> &letterToIndex, int radix);
 
 	/**
 	 * Puzzle data structure
