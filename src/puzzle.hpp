@@ -64,14 +64,14 @@ namespace Puzzle {
 	public:
 		MapGen(int domainSize, int codomainSize);
 		~MapGen();
-		int operator [](int i) const {return map[i];}
-		int *operator *() const {return map;}
+		int operator [](int i) const { return map[i]; }
+		int *operator *() const { return map.get(); }
 		bool nextMap();
 
 	private:
 		int n;      ///< Codomain size
 		int m;      ///< Domain size
-		int *map;
+		std::unique_ptr<int[]> map;
 	};
 
 	/**

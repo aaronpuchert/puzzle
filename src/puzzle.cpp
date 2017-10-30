@@ -259,25 +259,20 @@ bool Puzzle::eval(const int *assignment) const
 
 // END Implementation of Puzzle
 
-//------------------------------
-// PERMUTATION GENERATOR IMPLEMENTATION
-//------------------------------
+// BEGIN Implementation of Permutation generator
+
 MapGen::MapGen(int domainSize, int codomainSize)
-	: n(codomainSize), m(domainSize)
+	: n(codomainSize), m(domainSize), map(new int[domainSize])
 {
 	if (codomainSize < domainSize)
 		throw std::domain_error("There are no injective maps if the codomain is smaller than the domain.");
-	map = new int[domainSize];
 
 	// M0
 	for (int i = 0; i < domainSize; ++i)
 		map[i] = i;
 }
 
-MapGen::~MapGen()
-{
-	delete[] map;
-}
+MapGen::~MapGen() = default;
 
 //---------------------------  ALGORITHM DESCRIPTION  -------------------------
 // (The following algorithm is inspired by Donald E. Knuth: The Art of Computer Programming, Vol. 4, Fasc. 2, Algorithm L; but slightly modified)
@@ -335,6 +330,8 @@ bool MapGen::nextMap()
 
 	return true;
 }
+
+// END Implementation of Permutation generator
 
 //------------------------------
 //        PUZZLE SOLVER
