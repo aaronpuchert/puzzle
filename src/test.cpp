@@ -20,8 +20,8 @@ static testing::AssertionResult verifySolutions(
 
 TEST_P(PuzzleTest, Solve)
 {
-	Puzzle::Puzz puzz(GetParam(), 10);
-	Puzzle::PuzzleSolver solver(puzz);
+	Puzzle::Puzzle puzzle(GetParam(), 10);
+	Puzzle::PuzzleSolver solver(puzzle);
 	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 

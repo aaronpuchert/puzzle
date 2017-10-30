@@ -87,12 +87,12 @@ class WordExpr : public Expression
 {
 public:
 	WordExpr(const char *begin, const char *end,
-	         const std::map<char, int> &transmap, int radix)
+	         const std::map<char, int> &letterToIndex, int radix)
 		: word(new int[std::distance(begin, end) + 1]), radix(radix)
 	{
 		size_t len = std::distance(begin, end);
 		for (size_t i = 0; i < len; ++i)
-			word[i] = transmap.at(begin[(len-1) - i]);
+			word[i] = letterToIndex.at(begin[(len-1) - i]);
 		word[len] = -1;
 	}
 
@@ -212,7 +212,7 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 			if (*cur >= '0' && *cur <= '9')
 				break;
 		if (cur == end)
-			return make_unique<WordExpr>(begin, end, transmap, radix);
+			return make_unique<WordExpr>(begin, end, letterToIndex, radix);
 		else
 			return make_unique<NumberExpr>(begin, end, radix);
 	}
@@ -224,34 +224,34 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 //  IMPLEMENTATION OF PUZZLES
 //------------------------------
 
-Puzzle::Puzz::Puzz(const char *puzzle, int rad) : radix(rad), lettermap(rad), leading(rad)
+Puzzle::Puzzle(const char *puzzle, int rad) : radix(rad), indexToLetter(rad), leading(rad)
 {
 	// fill Map
-	std::map<char, int> Map;
+	std::map<char, int> letterToIndex;
 	for (int i = 0; puzzle[i]; ++i)
 		if (puzzle[i] >= 'A' && puzzle[i] <= 'Z')   // what about nondecimal digits?
-			Map.insert(std::pair<char, int>(puzzle[i], -1));
+			letterToIndex.insert(std::pair<char, int>(puzzle[i], -1));
 
 	// assign numbers to letters
-	num = 0;
-	for (std::map<char, int>::iterator it = Map.begin(); it != Map.end(); ++it, ++num) {
-		lettermap[num] = it->first;
-		it->second = num;
+	numLetters = 0;
+	for (auto it = letterToIndex.begin(); it != letterToIndex.end(); ++it, ++numLetters) {
+		indexToLetter[numLetters] = it->first;
+		it->second = numLetters;
 	}
 
 	// make syntax tree
-	ExpressionParser parser(Map, rad);
+	ExpressionParser parser(letterToIndex, rad);
 	root = parser.parse(puzzle);
 
 	// leading digits aren't allowed to be zero
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
-		leading[Map[puzzle[0]]] = true;
+		leading[letterToIndex[puzzle[0]]] = true;
 	for (int i = 1; puzzle[i]; ++i)
 		if (puzzle[i-1] < 'A' && puzzle[i] >= 'A' && puzzle[i] <= 'Z')
-			leading[Map[puzzle[i]]] = true;
+			leading[letterToIndex[puzzle[i]]] = true;
 }
 
-bool Puzzle::Puzz::eval(const int *assignment) const
+bool Puzzle::eval(const int *assignment) const
 {
 	for (int i = 0; i < radix; ++i)
 		if (!assignment[i] && leading[i])
@@ -262,18 +262,19 @@ bool Puzzle::Puzz::eval(const int *assignment) const
 //------------------------------
 // PERMUTATION GENERATOR IMPLEMENTATION
 //------------------------------
-Puzzle::MapGen::MapGen(int DomSize, int CodSize) : n(CodSize), m(DomSize)
+MapGen::MapGen(int domainSize, int codomainSize)
+	: n(codomainSize), m(domainSize)
 {
-	if (CodSize < DomSize)
-		throw std::domain_error("There are no injektive maps if the codomain is smaller than the domain.");
-	map = new int[DomSize];
+	if (codomainSize < domainSize)
+		throw std::domain_error("There are no injective maps if the codomain is smaller than the domain.");
+	map = new int[domainSize];
 
 	// M0
-	for (int i = 0; i < DomSize; ++i)
+	for (int i = 0; i < domainSize; ++i)
 		map[i] = i;
 }
 
-Puzzle::MapGen::~MapGen()
+MapGen::~MapGen()
 {
 	delete[] map;
 }
@@ -293,7 +294,7 @@ Puzzle::MapGen::~MapGen()
 // M5. [Next combination] j <- m; while (a_j == j+(n-m)) --j;
 //     if (j=0) finished;
 //     else {++a_j; while (j<m) a_{++j} <- a_{j-1}+1; goto M1}
-bool Puzzle::MapGen::NextMap()
+bool MapGen::nextMap()
 {
 	int j, l, k;
 
@@ -338,32 +339,32 @@ bool Puzzle::MapGen::NextMap()
 //------------------------------
 //        PUZZLE SOLVER
 //------------------------------
-Puzzle::PuzzleSolver::PuzzleSolver(const Puzz &puzz)
-	: puzz(puzz) {}
+PuzzleSolver::PuzzleSolver(const Puzzle &puzzle)
+	: puzzle(puzzle) {}
 
-int Puzzle::PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
+int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 {
 	int numSolutions = 0;
 
 	try {
-		MapGen Gen(puzz.DomainSize(), puzz.radix);
+		MapGen mapGen(puzzle.getNumLetters(), puzzle.getRadix());
 
 		if (terminal)
 			out << "\e[1m";
-		for (int i = 0; i < puzz.DomainSize(); ++i)
-			out << puzz[i] << ' ';
+		for (int i = 0; i < puzzle.getNumLetters(); ++i)
+			out << puzzle[i] << ' ';
 		if (terminal)
 			out << "\e[0m";
 		out << std::endl;
 
 		do
-			if (puzz.eval(*Gen)) {
+			if (puzzle.eval(*mapGen)) {
 				++numSolutions;
-				for (int i = 0; i < puzz.DomainSize(); ++i)
-					out << Gen[i] << ' ';
+				for (int i = 0; i < puzzle.getNumLetters(); ++i)
+					out << mapGen[i] << ' ';
 				out << std::endl;
 			}
-		while (Gen.NextMap());
+		while (mapGen.nextMap());
 	}
 	catch (const std::domain_error &err) {
 		out << "This alphametic has too many letters.\n\n";

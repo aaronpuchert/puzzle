@@ -24,34 +24,35 @@ namespace Puzzle {
 	class ExpressionParser
 	{
 	public:
-		ExpressionParser(const std::map<char, int> &transmap, int radix)
-			: transmap(transmap), radix(radix) {}
+		ExpressionParser(const std::map<char, int> &letterToIndex, int radix)
+			: letterToIndex(letterToIndex), radix(radix) {}
 		std::unique_ptr<Expression> parse(const char *expr);
 
 	private:
 		std::unique_ptr<Expression> parse(const char *begin, const char *end);
 
-		const std::map<char, int> &transmap;
+		const std::map<char, int> &letterToIndex;
 		int radix;
 	};
 	std::unique_ptr<Expression> parse(
 		const char* expr, size_t len,
-		const std::map<char, int> &transmap, int radix);
+		const std::map<char, int> &letterToIndex, int radix);
 
 	/**
 	 * Puzzle data structure
 	 */
-	class Puzz {
+	class Puzzle {
 	public:
-		Puzz(const char *puzzle, int rad);
+		Puzzle(const char *puzzle, int rad);
 		bool eval(const int *assignment) const;
-		int DomainSize() const {return num;}
-		char operator[](int n) const {return lettermap[n];}
+		int getRadix() const { return radix; }
+		int getNumLetters() const { return numLetters; }
+		char operator[](int n) const { return indexToLetter[n]; }
 
-		int radix;
 	private:
-		int num;
-		std::vector<char> lettermap;
+		int radix;
+		int numLetters;
+		std::vector<char> indexToLetter;
 		std::vector<bool> leading;
 		std::unique_ptr<Expression> root;
 	};
@@ -61,16 +62,16 @@ namespace Puzzle {
 	 */
 	class MapGen {
 	public:
-		MapGen(int DomSize, int CodSize);
+		MapGen(int domainSize, int codomainSize);
 		~MapGen();
 		int operator [](int i) const {return map[i];}
 		int *operator *() const {return map;}
-		bool NextMap();
+		bool nextMap();
 
 	private:
-		int n;      // codomain size
-		int m;      // domain size
-		int *map;   // current map
+		int n;      ///< Codomain size
+		int m;      ///< Domain size
+		int *map;
 	};
 
 	/**
@@ -78,11 +79,11 @@ namespace Puzzle {
 	 */
 	class PuzzleSolver {
 	public:
-		PuzzleSolver(const Puzz &puzz);
+		PuzzleSolver(const Puzzle &puzz);
 		int print_solutions(std::ostream& out, bool terminal);
 
 	private:
-		const Puzz &puzz;
+		const Puzzle &puzzle;
 	};
 
 	// LOW: exceptions...
