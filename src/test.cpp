@@ -5,7 +5,7 @@
 class PuzzleTest : public testing::TestWithParam<const char*> {};
 
 static testing::AssertionResult verifySolutions(
-	const char* solver_expr, const char* numSol_expr,
+	const char* /* solver_expr */, const char* numSol_expr,
 	Puzzle::PuzzleSolver &solver, int numSol)
 {
 	std::ostringstream str;

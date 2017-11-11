@@ -364,7 +364,7 @@ int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 			}
 		while (mapGen.nextMap());
 	}
-	catch (const std::domain_error &err) {
+	catch (const std::domain_error &) {
 		out << "This alphametic has too many letters.\n\n";
 	}
 
