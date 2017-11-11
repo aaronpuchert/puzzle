@@ -139,15 +139,12 @@ private:
  * Parser data
  */
 enum class NodeType {
-	EQUAL = 0,          // should occur exactly once - at root
+	EQUAL,
 	PLUS,
 	MINUS,
 	MULTIPLY,
 	DIVIDE,
-	// FACTORIAL,
-	// BINOMIAL,   etc.
-	WORD = 0x1000,      // "fixed-value"/number leaf
-	NUMBER              // "variable-value"/word leaf
+	LEAF
 };
 
 struct ExprType {
@@ -156,7 +153,7 @@ struct ExprType {
 	int priority;
 };
 
-static const ExprType ParseTable[] = {
+static constexpr ExprType ParseTable[] = {
 	{'=', NodeType::EQUAL, 0},
 	{'+', NodeType::PLUS, 1},
 	{'-', NodeType::MINUS, 1},
@@ -172,7 +169,7 @@ std::unique_ptr<Expression> ExpressionParser::parse(const char *expr)
 std::unique_ptr<Expression> ExpressionParser::parse(
 	const char *begin, const char *end)
 {
-	NodeType type = NodeType::WORD;
+	NodeType type = NodeType::LEAF;
 	const char *split;
 	int priority = std::numeric_limits<int>::max();
 
@@ -187,7 +184,7 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 			}
 
 	// split expression and process parts recursively
-	if (type != NodeType::WORD) {
+	if (type != NodeType::LEAF) {
 		auto left = parse(begin, split);
 		auto right = parse(split+1, end);
 		switch (type) {
