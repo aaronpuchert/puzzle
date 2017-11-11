@@ -1,7 +1,6 @@
 #ifndef FRACTION_HPP
 #define FRACTION_HPP
 
-// GENERIC FRACTION TYPE
 template<typename T> struct fraction {
 	T num, denom;
 

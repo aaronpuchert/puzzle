@@ -1,9 +1,6 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
-//------------------------------
-//  PUZZLE SOLVER MAIN HEADER
-//------------------------------
 #include <vector>
 #include <map>
 #include <memory>
@@ -82,8 +79,6 @@ namespace Puzzle {
 	private:
 		const Puzzle &puzzle;
 	};
-
-	// LOW: exceptions...
 }
 
 #endif

@@ -338,9 +338,8 @@ bool MapGen::nextMap()
 
 // END Implementation of Permutation generator
 
-//------------------------------
-//        PUZZLE SOLVER
-//------------------------------
+// BEGIN Implementation of Puzzle solver
+
 PuzzleSolver::PuzzleSolver(const Puzzle &puzzle)
 	: puzzle(puzzle) {}
 
@@ -374,5 +373,7 @@ int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 
 	return numSolutions;
 }
+
+// END Implementation of Puzzle solver.
 
 }
