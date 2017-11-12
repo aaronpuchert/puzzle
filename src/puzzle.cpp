@@ -293,27 +293,21 @@ MapGen::~MapGen() = default;
 
 bool MapGen::nextMap()
 {
-	int j, l, k;
-
 	// M2. Find j.
-	j = m - 2;      // "j ← m-1"
+	int j = m - 2;  // "j ← m-1"
 	while (j >= 0 && (map[j] >= map[j+1]))
 		--j;
 	if (j >= 0) {
 		// M3. Next aⱼ.
-		l = m - 1;  // "l ← m"
+		int l = m - 1;  // "l ← m"
 		while (map[j] >= map[l])
 			--l;
 		std::swap(map[j], map[l]);
 	}
 
 	// M4. Reverse aⱼ₊₁, ..., aₘ.
-	k = j + 1;      // "k ← j+1"
-	l = m - 1;      // "l ← m"
-	while (k < l) {
+	for (int k = j + 1, l = m - 1; k < l; ++k, --l)
 		std::swap(map[k], map[l]);
-		++k; --l;
-	}
 
 	if (j < 0) {
 		// M5. Next combination.
@@ -324,7 +318,7 @@ bool MapGen::nextMap()
 		if (j < 0)
 			return false;
 		else {
-			l = map[j];
+			int l = map[j];
 			while (j < m)
 				map[j++] = ++l;
 		}
