@@ -24,6 +24,10 @@ HPPS = $(patsubst %,src/%,$(HEADERS))
 MAIN_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(MAIN))
 TEST_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(TEST))
 
+# Main target
+$(TARGET): $(BUILDDIR)/ $(MAIN_OBJS)
+	$(CXX) $(LFLAGS) -o $@ $(MAIN_OBJS)
+
 # Google Test shenanigans. Some distributions don't provide libgtest.so.
 # So we have to compile it for ourselves first. Well that is fun.
 ifdef GTEST_PREFIX
@@ -38,10 +42,6 @@ $(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc $(BUILDDIR)/
 else
 GTEST = -lgtest -lgtest_main
 endif
-
-# Main target
-$(TARGET): $(BUILDDIR)/ $(MAIN_OBJS)
-	$(CXX) $(LFLAGS) -o $@ $(MAIN_OBJS)
 
 # Test binary
 $(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS) $(GTEST_OBJ)
