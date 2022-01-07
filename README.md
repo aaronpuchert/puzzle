@@ -1,7 +1,7 @@
 PUZZLE - SOLVING ALPHAMETICS
 ----------------------------
 
-[![Build Status](https://travis-ci.org/aaronpuchert/puzzle.svg?branch=master)](https://travis-ci.org/aaronpuchert/puzzle)
+[![Build Status](https://github.com/aaronpuchert/puzzle/actions/workflows/build-test.yml/badge.svg)](https://github.com/aaronpuchert/puzzle/actions/workflows/build-test.yml)
 
 Introduction
 ------------
