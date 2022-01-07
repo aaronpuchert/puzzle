@@ -25,7 +25,7 @@ TEST_P(PuzzleTest, Solve)
 	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 
-const char *puzzles[] = {
+static constexpr const char *puzzles[] = {
 	// Donald E. Knuth, The Art of Computer Programming, Vol. 4A, pp. 324--347
 	"SEND+A+TAD+MORE=MONEY",
 	"COUPLE+COUPLE=QUARTET",
@@ -53,7 +53,7 @@ const char *puzzles[] = {
 	"ZAUN+TUERE=ELSTER"
 };
 
-const char *special[] = {
+static constexpr const char *special[] = {
 	// nonpure
 	"VIOLIN+VIOLIN+VIOLA=TRIO+SONATA",
 	"TWO*TWO=SQUARE",

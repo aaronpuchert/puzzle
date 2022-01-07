@@ -2,7 +2,7 @@
 #include <iostream>
 #include "puzzle.hpp"
 
-constexpr const char usage[] = R"#(
+static constexpr char usage[] = R"#(
 Finds all ways to replace letters by digits to satisfy the given equation.
 The equation should be of the form expr=expr, where an expr is
 

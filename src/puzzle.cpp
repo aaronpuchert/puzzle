@@ -18,6 +18,8 @@ namespace Puzzle {
 
 Expression::~Expression() = default;
 
+namespace {
+
 class BinaryExpr : public Expression
 {
 protected:
@@ -130,6 +132,8 @@ public:
 private:
 	int64_t value;
 };
+
+} // end namespace
 
 // END Implementation of Expressions
 
