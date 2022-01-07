@@ -1,10 +1,11 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
-#include <vector>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <ostream>
+#include <vector>
 #include "fraction.hpp"
 
 namespace Puzzle {

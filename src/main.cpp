@@ -1,6 +1,5 @@
-#include <string>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 #include "puzzle.hpp"
 
 constexpr const char usage[] = R"#(
