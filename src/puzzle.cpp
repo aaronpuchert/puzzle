@@ -202,9 +202,10 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 				return make_unique<ProductExpr>(std::move(left), std::move(right));
 			case NodeType::DIVIDE:
 				return make_unique<QuotientExpr>(std::move(left), std::move(right));
-			default:
-				throw std::runtime_error("Unreachable code location");
+			case NodeType::LEAF:
+				break;
 		}
+		throw std::runtime_error("Unreachable code location");
 	}
 	else {
 		// Is it a word or number?
