@@ -33,7 +33,7 @@ GTEST = $(GTEST_OBJ)
 ifneq ($(GTEST_PREFIX),/usr)
 CXXFLAGS += -I$(GTEST_PREFIX)/include
 endif
-$(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc
+$(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc $(BUILDDIR)/
 	$(CXX) -c $(CXXFLAGS) -I$(GTEST_DIR) -o $@ $^
 else
 GTEST = -lgtest -lgtest_main
@@ -48,7 +48,7 @@ $(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS) $(GTEST_OBJ)
 	$(CXX) $(LFLAGS) $(GTEST) -lpthread -o $@ $(TEST_OBJS)
 
 # Object files
-$(BUILDDIR)/%.o: src/%.cpp $(HPPS)
+$(BUILDDIR)/%.o: src/%.cpp $(HPPS) $(BUILDDIR)/
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 $(BUILDDIR)/:
