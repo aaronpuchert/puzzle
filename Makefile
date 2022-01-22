@@ -25,7 +25,7 @@ MAIN_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(MAIN))
 TEST_OBJS = $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(CPPS) $(TEST))
 
 # Main target
-$(TARGET): $(BUILDDIR)/ $(MAIN_OBJS)
+$(TARGET): $(MAIN_OBJS)
 	$(CXX) $(LFLAGS) -o $@ $(MAIN_OBJS)
 
 # Google Test shenanigans. Some distributions don't provide libgtest.so.
@@ -37,18 +37,18 @@ GTEST = $(GTEST_OBJ)
 ifneq ($(GTEST_PREFIX),/usr)
 CXXFLAGS += -I$(GTEST_PREFIX)/include
 endif
-$(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc $(BUILDDIR)/
+$(GTEST_OBJ): $(BUILDDIR)/%.o: $(GTEST_DIR)/src/%.cc | $(BUILDDIR)/
 	$(CXX) -c $(CXXFLAGS) -I$(GTEST_DIR) -o $@ $^
 else
 GTEST = -lgtest -lgtest_main
 endif
 
 # Test binary
-$(TEST_TARGET): $(BUILDDIR)/ $(TEST_OBJS) $(GTEST_OBJ)
+$(TEST_TARGET): $(TEST_OBJS) $(GTEST_OBJ) | $(BUILDDIR)/
 	$(CXX) $(LFLAGS) $(GTEST) -lpthread -o $@ $(TEST_OBJS)
 
 # Object files
-$(BUILDDIR)/%.o: src/%.cpp $(HPPS) $(BUILDDIR)/
+$(BUILDDIR)/%.o: src/%.cpp $(HPPS) | $(BUILDDIR)/
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 $(BUILDDIR)/:
