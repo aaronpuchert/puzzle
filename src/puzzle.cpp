@@ -174,11 +174,11 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 	// TODO: process parantheses
 	// LOW: skip whitespace (well, maybe)
 	for (const char *cur = begin; cur != end; ++cur)
-		for (size_t op = 0; op < (sizeof(ParseTable)/sizeof(ExprType)); ++op)
-			if (*cur == ParseTable[op].op && priority >= ParseTable[op].priority) {
-				type = ParseTable[op].type;
+		for (const ExprType& exprType : ParseTable)
+			if (*cur == exprType.op && priority >= exprType.priority) {
+				type = exprType.type;
 				split = cur;
-				priority = ParseTable[op].priority;
+				priority = exprType.priority;
 			}
 
 	// split expression and process parts recursively
