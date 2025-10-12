@@ -1,16 +1,10 @@
 #include <utility>
 #include <iterator>
+#include <memory>
 #include <limits>
 #include <cstring>
 #include <stdexcept>
 #include "puzzle.hpp"
-
-/// We don't want to rely on C++14 yet.
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
 
 namespace Puzzle {
 
@@ -193,15 +187,15 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 		auto right = parse(split+1, end);
 		switch (type) {
 			case NodeType::EQUAL:
-				return make_unique<EqualsExpr>(std::move(left), std::move(right));
+				return std::make_unique<EqualsExpr>(std::move(left), std::move(right));
 			case NodeType::PLUS:
-				return make_unique<SumExpr>(std::move(left), std::move(right));
+				return std::make_unique<SumExpr>(std::move(left), std::move(right));
 			case NodeType::MINUS:
-				return make_unique<DifferenceExpr>(std::move(left), std::move(right));
+				return std::make_unique<DifferenceExpr>(std::move(left), std::move(right));
 			case NodeType::MULTIPLY:
-				return make_unique<ProductExpr>(std::move(left), std::move(right));
+				return std::make_unique<ProductExpr>(std::move(left), std::move(right));
 			case NodeType::DIVIDE:
-				return make_unique<QuotientExpr>(std::move(left), std::move(right));
+				return std::make_unique<QuotientExpr>(std::move(left), std::move(right));
 			case NodeType::LEAF:
 				break;
 		}
@@ -214,9 +208,9 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 			if (*cur >= '0' && *cur <= '9')
 				break;
 		if (cur == end)
-			return make_unique<WordExpr>(begin, end, letterToIndex, radix);
+			return std::make_unique<WordExpr>(begin, end, letterToIndex, radix);
 		else
-			return make_unique<NumberExpr>(begin, end, radix);
+			return std::make_unique<NumberExpr>(begin, end, radix);
 	}
 }
 
