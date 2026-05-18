@@ -24,19 +24,7 @@ if wanted.
 Compiling
 ---------
 
-After downloading the zip or tarball, just switch into the
-project directory and execute
-
-	make
-
-or, if you prefer gcc,
-
-	export CXX=g++; make -e
-
-If you want to be really sure that everything went fine,
-execute
-
-	make test
+The build uses CMake and a C++17-compatible compiler.
 
 Usage
 -----

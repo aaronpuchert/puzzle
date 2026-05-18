@@ -12,16 +12,17 @@ jobs:
     strategy:
       matrix:
         compiler: ['g++', 'clang++']
-        variant: ['debug', 'release']
-    env:
-      CXX: ${{ matrix.compiler }}
-      VARIANT: ${{ matrix.variant }}
-      GTEST_PREFIX: /usr
+        variant: ['Debug', 'RelWithDebInfo']
     steps:
     - name: Install Google Test
       run: sudo apt-get install libgtest-dev
     - uses: actions/checkout@v2
+    - name: configure
+      run: >
+        cmake -B build
+        -DCMAKE_BUILD_TYPE=${{matrix.variant}}
+        -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
     - name: make
-      run: make
-    - name: make test
-      run: make test
+      run: cmake --build build -j $(nproc)
+    - name: test
+      run: build/test

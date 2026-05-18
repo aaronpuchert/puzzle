@@ -1,7 +1,5 @@
 # Build files
-*.exe
-debug/
-release/
+build/
 
 # project files
 *.kdev4
