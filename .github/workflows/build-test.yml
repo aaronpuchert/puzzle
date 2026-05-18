@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Install Google Test
       run: sudo apt-get install libgtest-dev
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@main
     - name: configure
       run: >
         cmake -B build
