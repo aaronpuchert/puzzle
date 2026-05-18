@@ -1,3 +1,8 @@
+# Define flags for non-standard build types.
+SET(CMAKE_CXX_FLAGS_ASAN_INIT "-O1 -g -fsanitize=address")
+SET(CMAKE_CXX_FLAGS_UBSAN_INIT
+    "-O1 -g -fsanitize=undefined -fno-sanitize-recover=all")
+
 cmake_minimum_required(VERSION 3.6)
 
 project(puzzle CXX)

@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         compiler: ['g++', 'clang++']
-        variant: ['Debug', 'RelWithDebInfo']
+        variant: ['RelWithDebInfo', 'ASan', 'UBSan']
     steps:
     - name: Install Google Test
       run: sudo apt-get install libgtest-dev
