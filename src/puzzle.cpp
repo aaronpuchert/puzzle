@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include "puzzle.hpp"
 
-namespace Puzzle {
+namespace puzzle {
 
 // BEGIN Implementation of Expressions
 

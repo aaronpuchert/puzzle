@@ -8,7 +8,7 @@
 #include <vector>
 #include "fraction.hpp"
 
-namespace Puzzle {
+namespace puzzle {
 	/**
 	 * Expression type
 	 */

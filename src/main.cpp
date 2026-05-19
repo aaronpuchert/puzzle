@@ -30,11 +30,11 @@ int main(int argc, char **argv)
 	if (argc > 2)	// then there is a radix argument
 		nRad = atoi(argv[1]);
 
-	Puzzle::Puzzle puzzle(argv[argc-1], nRad);
+	puzzle::Puzzle puzzle(argv[argc-1], nRad);
 	std::cout << "There are " << puzzle.getNumLetters()
 	          << " different letters.\n\n";
 
-	Puzzle::PuzzleSolver solver(puzzle);
+	puzzle::PuzzleSolver solver(puzzle);
 
 	int numSolutions = solver.print_solutions(std::cout, true);
 	std::cout << numSolutions << " solutions found.\n";

@@ -6,7 +6,7 @@ class PuzzleTest : public testing::TestWithParam<const char*> {};
 
 static testing::AssertionResult verifySolutions(
 	const char* /* solver_expr */, const char* numSol_expr,
-	Puzzle::PuzzleSolver &solver, int numSol)
+	puzzle::PuzzleSolver &solver, int numSol)
 {
 	std::ostringstream str;
 	int actSol = solver.print_solutions(str, true);
@@ -20,8 +20,8 @@ static testing::AssertionResult verifySolutions(
 
 TEST_P(PuzzleTest, Solve)
 {
-	Puzzle::Puzzle puzzle(GetParam(), 10);
-	Puzzle::PuzzleSolver solver(puzzle);
+	puzzle::Puzzle puzzle(GetParam(), 10);
+	puzzle::PuzzleSolver solver(puzzle);
 	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 
