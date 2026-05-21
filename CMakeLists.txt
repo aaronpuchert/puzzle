@@ -7,13 +7,15 @@ cmake_minimum_required(VERSION 3.6)
 
 project(puzzle CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(Clang|GNU)")
     add_compile_options(-Wall -Wextra)
 endif()
 
 add_library(solve STATIC
+    src/arena.cpp
+    src/generic.cpp
     src/puzzle.cpp
 )
 

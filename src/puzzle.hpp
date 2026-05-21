@@ -1,35 +1,30 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
+#include "arena.hpp"
+#include "expr.hpp"
 #include "fraction.hpp"
 #include <bitset>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <ostream>
+#include <span>
 
 namespace puzzle {
-	/**
-	 * Expression type
-	 */
-	class Expression
-	{
-	public:
-		virtual ~Expression();
-		virtual fraction<int64_t> eval(const int *assignment) const = 0;
-	};
-
 	class ExpressionParser
 	{
 	public:
-		ExpressionParser(const std::map<char, int> &letterToIndex, int radix)
-			: letterToIndex(letterToIndex), radix(radix) {}
-		std::unique_ptr<Expression> parse(const char *expr);
+		ExpressionParser(
+			Arena &arena, const std::map<char, Letter> &letterToIndex, int radix)
+			: arena(arena), letterToIndex(letterToIndex), radix(radix) {}
+		Expr *parse(const char *expr);
 
 	private:
-		std::unique_ptr<Expression> parse(const char *begin, const char *end);
+		Expr *parse(const char *begin, const char *end);
 
-		const std::map<char, int> &letterToIndex;
+		Arena &arena;
+		const std::map<char, Letter> &letterToIndex;
 		int radix;
 	};
 
@@ -41,17 +36,29 @@ namespace puzzle {
 		static constexpr int maxNumLetters = 32;
 
 		Puzzle(const char *puzzle, int rad);
-		bool eval(const int *assignment) const;
 		int getRadix() const { return radix; }
 		int getNumLetters() const { return numLetters; }
+		std::bitset<maxNumLetters> getLeading() const { return leading; }
 		char operator[](int n) const { return indexToLetter[n]; }
+		const Expr *getRoot() const { return root; }
 
 	private:
 		int radix;
 		int numLetters;
 		char indexToLetter[maxNumLetters];
 		std::bitset<maxNumLetters> leading;
-		std::unique_ptr<Expression> root;
+		Arena arena;
+		const Expr *root;
+	};
+
+	class GenericEvaluator {
+	public:
+		GenericEvaluator(const Puzzle &puzzle) : puzzle(puzzle) {}
+
+		bool operator()(const int *assignment) const;
+
+	private:
+		const Puzzle &puzzle;
 	};
 
 	/**

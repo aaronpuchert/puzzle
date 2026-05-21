@@ -10,129 +10,6 @@
 
 namespace puzzle {
 
-// BEGIN Implementation of Expressions
-
-Expression::~Expression() = default;
-
-namespace {
-
-class BinaryExpr : public Expression
-{
-protected:
-	BinaryExpr(std::unique_ptr<Expression> left,
-	           std::unique_ptr<Expression> right)
-		: left(std::move(left)), right(std::move(right)) {}
-
-	std::unique_ptr<Expression> left, right;
-};
-
-class EqualsExpr : public BinaryExpr
-{
-public:
-	EqualsExpr(std::unique_ptr<Expression> left,
-	           std::unique_ptr<Expression> right)
-		: BinaryExpr(std::move(left), std::move(right)) {}
-
-	fraction<int64_t> eval(const int *assignment) const override
-		{ return left->eval(assignment) == right->eval(assignment); }
-};
-
-class SumExpr : public BinaryExpr
-{
-public:
-	SumExpr(std::unique_ptr<Expression> left,
-	        std::unique_ptr<Expression> right)
-		: BinaryExpr(std::move(left), std::move(right)) {}
-
-	fraction<int64_t> eval(const int *assignment) const override
-		{ return left->eval(assignment) + right->eval(assignment); }
-};
-
-class DifferenceExpr : public BinaryExpr
-{
-public:
-	DifferenceExpr(std::unique_ptr<Expression> left,
-	               std::unique_ptr<Expression> right)
-		: BinaryExpr(std::move(left), std::move(right)) {}
-
-	fraction<int64_t> eval(const int *assignment) const override
-		{ return left->eval(assignment) - right->eval(assignment); }
-};
-
-class ProductExpr : public BinaryExpr
-{
-public:
-	ProductExpr(std::unique_ptr<Expression> left,
-	            std::unique_ptr<Expression> right)
-		: BinaryExpr(std::move(left), std::move(right)) {}
-
-	fraction<int64_t> eval(const int *assignment) const override
-		{ return left->eval(assignment) * right->eval(assignment); }
-};
-
-class QuotientExpr : public BinaryExpr
-{
-public:
-	QuotientExpr(std::unique_ptr<Expression> left,
-	             std::unique_ptr<Expression> right)
-		: BinaryExpr(std::move(left), std::move(right)) {}
-
-	fraction<int64_t> eval(const int *assignment) const override
-		{ return left->eval(assignment) / right->eval(assignment); }
-};
-
-class WordExpr : public Expression
-{
-public:
-	WordExpr(const char *begin, const char *end,
-	         const std::map<char, int> &letterToIndex, int radix)
-		: word(new int[std::distance(begin, end) + 1]), radix(radix)
-	{
-		size_t len = std::distance(begin, end);
-		for (size_t i = 0; i < len; ++i)
-			word[i] = letterToIndex.at(begin[(len-1) - i]);
-		word[len] = -1;
-	}
-
-	fraction<int64_t> eval(const int *assignment) const override
-	{
-		int64_t res = 0, val = 1;
-		for (size_t i = 0; word[i] >= 0; ++i) {
-			res += assignment[word[i]] * val;
-			val *= radix;
-		}
-		return fraction<int64_t>(res);
-	}
-
-private:
-	std::unique_ptr<int[]> word;
-	int radix;
-};
-
-class NumberExpr : public Expression
-{
-public:
-	NumberExpr(const char* begin, const char* end, int radix) : value(0)
-	{
-		for (const char *cur = begin; cur != end; ++cur) {
-			value *= radix;
-			value += *cur - '0';
-		}
-	}
-
-	fraction<int64_t> eval(const int*) const override
-	{
-		return fraction<int64_t>(value);
-	}
-
-private:
-	int64_t value;
-};
-
-} // end namespace
-
-// END Implementation of Expressions
-
 // BEGIN Implementation of ExpressionParser
 
 /**
@@ -161,13 +38,12 @@ static constexpr ExprType ParseTable[] = {
 	{'/', NodeType::DIVIDE, 2}
 };
 
-std::unique_ptr<Expression> ExpressionParser::parse(const char *expr)
+Expr *ExpressionParser::parse(const char *expr)
 {
 	return parse(expr, expr + strlen(expr));
 }
 
-std::unique_ptr<Expression> ExpressionParser::parse(
-	const char *begin, const char *end)
+Expr *ExpressionParser::parse(const char *begin, const char *end)
 {
 	NodeType type = NodeType::LEAF;
 	const char *split;
@@ -188,16 +64,18 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 		auto left = parse(begin, split);
 		auto right = parse(split+1, end);
 		switch (type) {
+			using enum BinaryExpr::Op;
+
 			case NodeType::EQUAL:
-				return std::make_unique<EqualsExpr>(std::move(left), std::move(right));
+				return EqualityExpr::create(arena, left, right);
 			case NodeType::PLUS:
-				return std::make_unique<SumExpr>(std::move(left), std::move(right));
+				return BinaryExpr::create(arena, Add, left, right);
 			case NodeType::MINUS:
-				return std::make_unique<DifferenceExpr>(std::move(left), std::move(right));
+				return BinaryExpr::create(arena, Sub, left, right);
 			case NodeType::MULTIPLY:
-				return std::make_unique<ProductExpr>(std::move(left), std::move(right));
+				return BinaryExpr::create(arena, Mul, left, right);
 			case NodeType::DIVIDE:
-				return std::make_unique<QuotientExpr>(std::move(left), std::move(right));
+				return BinaryExpr::create(arena, Div, left, right);
 			case NodeType::LEAF:
 				PUZZLE_UNREACHABLE;
 		}
@@ -209,10 +87,22 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 		for (cur = begin; cur != end; ++cur)
 			if (*cur >= '0' && *cur <= '9')
 				break;
-		if (cur == end)
-			return std::make_unique<WordExpr>(begin, end, letterToIndex, radix);
-		else
-			return std::make_unique<NumberExpr>(begin, end, radix);
+		if (cur == end) {
+			size_t len = std::distance(begin, end);
+			if (len > WordExpr::maxSize)
+				throw std::out_of_range("Word too long");
+			Letter word[WordExpr::maxSize];
+			for (size_t i = 0; i < len; ++i)
+				word[i] = letterToIndex.at(begin[(len-1) - i]);
+			return WordExpr::create(arena, word, len);
+		} else {
+			int value = 0;
+			for (const char *cur = begin; cur != end; ++cur) {
+				value *= radix;
+				value += *cur - '0';
+			}
+			return NumberExpr::create(arena, value);
+		}
 	}
 }
 
@@ -224,7 +114,7 @@ Puzzle::Puzzle(const char *puzzle, int rad)
 	: radix(rad), numLetters(0)
 {
 	// Collect letters.
-	std::map<char, int> letterToIndex;
+	std::map<char, Letter> letterToIndex;
 	for (const char *cur = puzzle; *cur; ++cur)
 		if (*cur >= 'A' && *cur <= 'Z')
 			letterToIndex[*cur];
@@ -237,7 +127,7 @@ Puzzle::Puzzle(const char *puzzle, int rad)
 	}
 
 	// Make syntax tree.
-	ExpressionParser parser(letterToIndex, rad);
+	ExpressionParser parser(arena, letterToIndex, rad);
 	root = parser.parse(puzzle);
 
 	// Leading digits aren't allowed to be zero.
@@ -246,14 +136,6 @@ Puzzle::Puzzle(const char *puzzle, int rad)
 	for (int i = 1; puzzle[i]; ++i)
 		if (puzzle[i-1] < 'A' && puzzle[i] >= 'A' && puzzle[i] <= 'Z')
 			leading[letterToIndex[puzzle[i]]] = true;
-}
-
-bool Puzzle::eval(const int *assignment) const
-{
-	for (int i = 0; i < numLetters; ++i)
-		if (!assignment[i] && leading[i])
-			return false;
-	return root->eval(assignment) != 0;
 }
 
 // END Implementation of Puzzle
@@ -351,8 +233,9 @@ int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 			out << "\e[0m";
 		out << std::endl;
 
+		GenericEvaluator eval(puzzle);
 		do
-			if (puzzle.eval(*mapGen)) {
+			if (eval(*mapGen)) {
 				++numSolutions;
 				for (int i = 0; i < puzzle.getNumLetters(); ++i)
 					out << mapGen[i] << ' ';

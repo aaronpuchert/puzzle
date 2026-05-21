@@ -11,4 +11,18 @@
 #error "Need definition for unreachable macro"
 #endif
 
+template<typename T, typename U>
+T* cast(U* u)
+{
+	assert(T::classof(u));
+	return static_cast<T*>(u);
+}
+
+template<typename T, typename U>
+const T* cast(const U* u)
+{
+	assert(T::classof(u));
+	return static_cast<const T*>(u);
+}
+
 #endif
