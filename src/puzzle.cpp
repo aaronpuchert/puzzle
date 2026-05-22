@@ -1,4 +1,5 @@
 #include "puzzle.hpp"
+#include <cassert>
 #include <utility>
 #include <iterator>
 #include <memory>
@@ -221,8 +222,6 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 Puzzle::Puzzle(const char *puzzle, int rad)
 	: radix(rad), numLetters(0)
 {
-	indexToLetter.reserve(rad);
-
 	// Collect letters.
 	std::map<char, int> letterToIndex;
 	for (const char *cur = puzzle; *cur; ++cur)
@@ -231,7 +230,8 @@ Puzzle::Puzzle(const char *puzzle, int rad)
 
 	// Assign numbers to letters.
 	for (auto &pair : letterToIndex) {
-		indexToLetter.push_back(pair.first);
+		assert(numLetters < maxNumLetters); // We only allow A-Z.
+		indexToLetter[numLetters] = pair.first;
 		pair.second = numLetters++;
 	}
 
@@ -240,7 +240,6 @@ Puzzle::Puzzle(const char *puzzle, int rad)
 	root = parser.parse(puzzle);
 
 	// Leading digits aren't allowed to be zero.
-	leading.assign(numLetters, false);
 	if (puzzle[0] >= 'A' && puzzle[0] <= 'Z')
 		leading[letterToIndex[puzzle[0]]] = true;
 	for (int i = 1; puzzle[i]; ++i)

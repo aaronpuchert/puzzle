@@ -2,11 +2,11 @@
 #define PUZZLE_HPP
 
 #include "fraction.hpp"
+#include <bitset>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <ostream>
-#include <vector>
 
 namespace puzzle {
 	/**
@@ -38,6 +38,8 @@ namespace puzzle {
 	 */
 	class Puzzle {
 	public:
+		static constexpr int maxNumLetters = 32;
+
 		Puzzle(const char *puzzle, int rad);
 		bool eval(const int *assignment) const;
 		int getRadix() const { return radix; }
@@ -47,8 +49,8 @@ namespace puzzle {
 	private:
 		int radix;
 		int numLetters;
-		std::vector<char> indexToLetter;
-		std::vector<bool> leading;
+		char indexToLetter[maxNumLetters];
+		std::bitset<maxNumLetters> leading;
 		std::unique_ptr<Expression> root;
 	};
 
