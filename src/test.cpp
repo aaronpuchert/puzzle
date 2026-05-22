@@ -2,11 +2,13 @@
 #include <sstream>
 #include <gtest/gtest.h>
 
+using namespace puzzle;
+
 class PuzzleTest : public testing::TestWithParam<const char*> {};
 
 static testing::AssertionResult verifySolutions(
 	const char* /* solver_expr */, const char* numSol_expr,
-	puzzle::PuzzleSolver &solver, int numSol)
+	PuzzleSolver &solver, int numSol)
 {
 	std::ostringstream str;
 	int actSol = solver.print_solutions(str, true);
@@ -20,8 +22,8 @@ static testing::AssertionResult verifySolutions(
 
 TEST_P(PuzzleTest, Solve)
 {
-	puzzle::Puzzle puzzle(GetParam(), 10);
-	puzzle::PuzzleSolver solver(puzzle);
+	Puzzle puzzle(GetParam(), 10);
+	PuzzleSolver solver(puzzle);
 	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 

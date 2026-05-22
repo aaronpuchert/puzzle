@@ -17,6 +17,8 @@ check for overflow.
 If no radix is given, numbers are interpreted as decimal.
 )#";
 
+using namespace puzzle;
+
 int main(int argc, char **argv)
 {
 	if (argc < 2 || argc > 3) {
@@ -30,11 +32,11 @@ int main(int argc, char **argv)
 	if (argc > 2)	// then there is a radix argument
 		nRad = atoi(argv[1]);
 
-	puzzle::Puzzle puzzle(argv[argc-1], nRad);
+	Puzzle puzzle(argv[argc-1], nRad);
 	std::cout << "There are " << puzzle.getNumLetters()
 	          << " different letters.\n\n";
 
-	puzzle::PuzzleSolver solver(puzzle);
+	PuzzleSolver solver(puzzle);
 
 	int numSolutions = solver.print_solutions(std::cout, true);
 	std::cout << numSolutions << " solutions found.\n";
