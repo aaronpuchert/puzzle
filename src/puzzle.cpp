@@ -1,4 +1,5 @@
 #include "puzzle.hpp"
+#include "util.hpp"
 #include <cassert>
 #include <utility>
 #include <iterator>
@@ -198,9 +199,9 @@ std::unique_ptr<Expression> ExpressionParser::parse(
 			case NodeType::DIVIDE:
 				return std::make_unique<QuotientExpr>(std::move(left), std::move(right));
 			case NodeType::LEAF:
-				break;
+				PUZZLE_UNREACHABLE;
 		}
-		throw std::runtime_error("Unreachable code location");
+		PUZZLE_UNREACHABLE;
 	}
 	else {
 		// Is it a word or number?
