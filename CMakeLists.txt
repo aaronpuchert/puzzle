@@ -16,6 +16,7 @@ endif()
 add_library(solve STATIC
     src/arena.cpp
     src/generic.cpp
+    src/linear.cpp
     src/puzzle.cpp
 )
 

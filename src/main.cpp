@@ -1,6 +1,7 @@
 #include "puzzle.hpp"
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 static constexpr char usage[] = R"#(
 Finds all ways to replace letters by digits to satisfy the given equation.
@@ -19,6 +20,15 @@ If no radix is given, numbers are interpreted as decimal.
 
 using namespace puzzle;
 
+std::unique_ptr<Evaluator> createEvaluator(const Puzzle& puzzle)
+{
+	try {
+		return std::make_unique<LinearEvaluator>(puzzle);
+	} catch(const Unsupported&) {
+		return std::make_unique<GenericEvaluator>(puzzle);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	if (argc < 2 || argc > 3) {
@@ -34,9 +44,10 @@ int main(int argc, char **argv)
 
 	Puzzle puzzle(argv[argc-1], nRad);
 	std::cout << "There are " << puzzle.getNumLetters()
-	          << " different letters.\n\n";
+	          << " different letters.\n";
 
-	PuzzleSolver solver(puzzle);
+	std::unique_ptr<Evaluator> eval = createEvaluator(puzzle);
+	PuzzleSolver solver(puzzle, *eval);
 
 	int numSolutions = solver.print_solutions(std::cout, true);
 	std::cout << numSolutions << " solutions found.\n";

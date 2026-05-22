@@ -51,14 +51,37 @@ namespace puzzle {
 		const Expr *root;
 	};
 
-	class GenericEvaluator {
+	/// Exception to be thrown when a strategy does not support the puzzle.
+	struct Unsupported {};
+
+	class Evaluator {
+	public:
+		virtual ~Evaluator() = default;
+		virtual bool operator()(const int *assignment) const = 0;
+	};
+
+	class GenericEvaluator : public Evaluator {
 	public:
 		GenericEvaluator(const Puzzle &puzzle) : puzzle(puzzle) {}
 
-		bool operator()(const int *assignment) const;
+		bool operator()(const int *assignment) const override;
 
 	private:
 		const Puzzle &puzzle;
+	};
+
+	class LinearEvaluator : public Evaluator {
+	public:
+		LinearEvaluator(const Puzzle &puzzle);
+
+		bool operator()(const int *assignment) const override;
+
+	private:
+		void addCoeff(const Expr* expr, int factor);
+
+		const Puzzle& puzzle;
+		int coeff[Puzzle::maxNumLetters];
+		int constant;
 	};
 
 	/**
@@ -83,11 +106,12 @@ namespace puzzle {
 	 */
 	class PuzzleSolver {
 	public:
-		PuzzleSolver(const Puzzle &puzz);
+		PuzzleSolver(const Puzzle &puzz, const Evaluator& eval);
 		int print_solutions(std::ostream& out, bool terminal);
 
 	private:
 		const Puzzle &puzzle;
+		const Evaluator &eval;
 	};
 }
 

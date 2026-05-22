@@ -215,8 +215,8 @@ bool MapGen::nextMap()
 
 // BEGIN Implementation of Puzzle solver
 
-PuzzleSolver::PuzzleSolver(const Puzzle &puzzle)
-	: puzzle(puzzle) {}
+PuzzleSolver::PuzzleSolver(const Puzzle &puzzle, const Evaluator& eval)
+	: puzzle(puzzle), eval(eval) {}
 
 int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 {
@@ -225,6 +225,7 @@ int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 	try {
 		MapGen mapGen(puzzle.getNumLetters(), puzzle.getRadix());
 
+		out << '\n';
 		if (terminal)
 			out << "\e[1m";
 		for (int i = 0; i < puzzle.getNumLetters(); ++i)
@@ -233,7 +234,6 @@ int PuzzleSolver::print_solutions(std::ostream &out, bool terminal)
 			out << "\e[0m";
 		out << std::endl;
 
-		GenericEvaluator eval(puzzle);
 		do
 			if (eval(*mapGen)) {
 				++numSolutions;

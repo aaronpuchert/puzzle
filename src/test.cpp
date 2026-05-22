@@ -1,10 +1,23 @@
 #include "puzzle.hpp"
+#include <memory>
 #include <sstream>
 #include <gtest/gtest.h>
 
 using namespace puzzle;
 
-class PuzzleTest : public testing::TestWithParam<const char*> {};
+static std::unique_ptr<Evaluator> makeGeneric(const Puzzle &puzzle)
+{
+	return std::make_unique<GenericEvaluator>(puzzle);
+}
+
+static std::unique_ptr<Evaluator> makeLinear(const Puzzle &puzzle)
+{
+	return std::make_unique<LinearEvaluator>(puzzle);
+}
+
+class PuzzleTest :
+	public testing::TestWithParam<std::tuple<const char*,
+		std::unique_ptr<Evaluator> (*)(const Puzzle &puzzle)>> {};
 
 static testing::AssertionResult verifySolutions(
 	const char* /* solver_expr */, const char* numSol_expr,
@@ -22,8 +35,15 @@ static testing::AssertionResult verifySolutions(
 
 TEST_P(PuzzleTest, Solve)
 {
-	Puzzle puzzle(GetParam(), 10);
-	PuzzleSolver solver(puzzle);
+	auto [text, makeEvaluator] = GetParam();
+	Puzzle puzzle(text, 10);
+	std::unique_ptr<Evaluator> eval;
+	try {
+		eval = makeEvaluator(puzzle);
+	} catch (const Unsupported&) {
+		GTEST_SKIP() << "Strategy not supported";
+	}
+	PuzzleSolver solver(puzzle, *eval);
 	EXPECT_PRED_FORMAT2(verifySolutions, solver, 1);
 }
 
@@ -64,4 +84,7 @@ static constexpr const char *special[] = {
 	"A/BC+D/EF+G/HI=1",
 };
 
-INSTANTIATE_TEST_CASE_P(PureTests, PuzzleTest, ::testing::ValuesIn(puzzles));
+INSTANTIATE_TEST_SUITE_P(PureTests, PuzzleTest,
+	testing::Combine(
+		testing::ValuesIn(puzzles),
+		testing::Values(makeGeneric, makeLinear)));
