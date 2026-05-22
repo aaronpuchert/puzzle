@@ -1,10 +1,10 @@
+#include "puzzle.hpp"
 #include <utility>
 #include <iterator>
 #include <memory>
 #include <limits>
 #include <cstring>
 #include <stdexcept>
-#include "puzzle.hpp"
 
 namespace puzzle {
 

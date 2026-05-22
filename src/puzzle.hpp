@@ -1,12 +1,12 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
+#include "fraction.hpp"
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <ostream>
 #include <vector>
-#include "fraction.hpp"
 
 namespace puzzle {
 	/**

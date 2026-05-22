@@ -1,6 +1,6 @@
+#include "puzzle.hpp"
 #include <cstdlib>
 #include <iostream>
-#include "puzzle.hpp"
 
 static constexpr char usage[] = R"#(
 Finds all ways to replace letters by digits to satisfy the given equation.
